@@ -7,8 +7,8 @@ tokens { PAREN; }     // define imaginary token for vector literal
 // START: stat
 prog:	stat+ ;                         // build list of stat trees
 
-stat:	'make' REF ID expr  -> ^('make' REF ID expr)  // '=' is operator subtree root
-    |	'print' expr -> ^('print' expr) // 'print' is subtree root
+stat:	'make' REF ID expr (NL|COMMENT)  -> ^('make' ID expr)
+    |	'print' expr (NL|COMMENT) -> ^('print' expr) // 'print' is subtree root
     ;
 // END: stat
 
@@ -16,7 +16,7 @@ stat:	'make' REF ID expr  -> ^('make' REF ID expr)  // '=' is operator subtree r
 expr:	multExpr ('+'^ multExpr)* ;     // '+' is root node
 
 multExpr
-    :   primary (('*'^|'.'^) primary)*  // '*', '.' are roots
+    :   primary (('*'^|'/'^) primary)*  // '*', '.' are roots
     ;
     
 primary
@@ -32,5 +32,9 @@ ID : ( '_' | CHAR )( '_' | CHAR | INT )* ;
 
 fragment CHAR : 'a'..'z' | 'A'..'Z';
 
+NL: '\n';
+
+COMMENT : ';' .* NL { skip(); };
+
 INT : '0'..'9'+ ;
-WS  :   (' '|'\r'|'\n')+ {skip();} ;
+WS  :   (' '|'\t'|'\r')+ {skip();} ;
