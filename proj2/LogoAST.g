@@ -1,40 +1,43 @@
 // START: header
 grammar LogoAST;
-options {output=AST;} // we want to create ASTs
-tokens { PAREN; }     // define imaginary token for vector literal
+options {output=AST;}
+tokens { PAREN; }
 // END: header
 
 // START: stat
-prog:	stat+ ;                         // build list of stat trees
+prog:	stat+ ;
 
-stat:	'make' REF ID expr (NL|COMMENT)  -> ^('make' ID expr)
-    |	'print' expr (NL|COMMENT) -> ^('print' expr) // 'print' is subtree root
+stat:	'make' ref expr NL*  -> ^('make' ref expr)
+    |	'print' expr NL* -> ^('print' expr)
+    |   'if' condition '[' stat+ ']' NL* -> ^( 'if' condition stat+ )
+    |   'while' '[' condition ']' '[' stat+ ']' NL* -> ^( 'while' condition stat+ )
     ;
 // END: stat
 
-// START: expr
-expr:	multExpr ('+'^ multExpr)* ;     // '+' is root node
+condition: expr ( '<'^|'>'^|'<='^|'>='^ ) expr;
+
+expr: multExpr (('+'^|'-'^) multExpr)* ;
 
 multExpr
-    :   primary (('*'^|'/'^) primary)*  // '*', '.' are roots
+    :   primary (('*'^|'/'^) primary)*
     ;
     
 primary
     :   INT
-    |   REF ID
+    |   ref
     |   '(' expr (',' expr)* ')' -> ^(PAREN expr+)
     ;
-// END: expr
+    
+ref : ((':'^|'"'^) ID);
 
-REF : ':'|'"';
 
 ID : ( '_' | CHAR )( '_' | CHAR | INT )* ;
 
 fragment CHAR : 'a'..'z' | 'A'..'Z';
 
-NL: '\n';
+NL: '\r'? '\n';
 
 COMMENT : ';' .* NL { skip(); };
 
 INT : '0'..'9'+ ;
-WS  :   (' '|'\t'|'\r')+ {skip();} ;
+WS  :   (' '|'\t')+ {skip();} ;
