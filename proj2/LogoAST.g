@@ -14,7 +14,7 @@ stat:	'make' ref expr NL*  -> ^('make' ref expr)
     ;
 // END: stat
 
-condition: expr ( '<'^|'>'^|'<='^|'>='^ ) expr;
+condition: expr ( '<'^|'>'^|'<='^|'>='^|'='^ ) expr;
 
 expr: multExpr (('+'^|'-'^) multExpr)* ;
 
