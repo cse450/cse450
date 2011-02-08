@@ -11,19 +11,14 @@ import org.antlr.runtime.tree.*;
 
 public class Test {
     public static void main(String[] args) throws Exception {
-        CharStream input = null;
-        if ( args.length>0 ) {
-            input = new ANTLRStringStream(args[0]);
-        }
-        else {
-            input = new ANTLRInputStream(System.in);
-        }
+        CharStream input = new ANTLRInputStream(System.in);
+
         // Create lexer/parser to build trees from stdin
         LogoASTLexer lex = new LogoASTLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lex);
         LogoASTParser p = new LogoASTParser(tokens);
-	RuleReturnScope r = p.prog();   // launch parser by calling start rule
-        CommonTree t = (CommonTree)r.getTree();   // get tree result
+	RuleReturnScope r = p.prog();
+        CommonTree t = (CommonTree)r.getTree();
 
         System.out.println("Original tree: "+t.toStringTree()); // print the tree
 
