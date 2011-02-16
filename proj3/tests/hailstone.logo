@@ -1,0 +1,10 @@
+; collatz sequence (hailstone sequence)
+make "n 25
+
+while [:n > 1][
+   (print "N :n)
+   ifelse (modulo :n 2) = 0 [make "n :n / 2]
+                            [make "n 3*:n + 1]
+   ]
+; prints seq for 25: (see http://en.wikipedia.org/wiki/Collatz_conjecture)
+
