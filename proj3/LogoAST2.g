@@ -1,7 +1,32 @@
 // START: header
 grammar LogoAST2;
 options {output=AST;}
-tokens { PAREN; }
+tokens {
+BLOCK;
+PAREN;
+
+ADD = '+';
+SUB = '-';
+MUL = '*';
+DIV = '/';
+MOD = 'modulo';
+
+EQ = '=';
+LT = '<';
+LTE = '<=';
+GT = '>';
+GTE = '>=';
+NOT = 'not';
+
+IF = 'if';
+IFELSE = 'ifelse';
+WHILE = 'while';
+PRINT = 'print';
+MAKE = 'make';
+
+REF = '"';
+VAL = ':';
+}
 // END: header
 
 // START: stat
