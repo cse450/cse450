@@ -1,5 +1,5 @@
 // START: header
-grammar LogoAST;
+grammar LogoAST2;
 options {output=AST;}
 tokens { PAREN; }
 // END: header
@@ -9,10 +9,12 @@ prog:	stat+ ;
 
 stat:	'make' ref expr NL*  -> ^('make' ref expr)
     |	'print' expr NL* -> ^('print' expr)
-    |   'if' condition '[' stat+ ']' NL* -> ^( 'if' condition stat+ )
-    |   'while' '[' condition ']' '[' stat+ ']' NL* -> ^( 'while' condition stat+ )
+    |   'if' negateablecondition '[' stat+ ']' NL* -> ^( 'if' negateablecondition stat+ )
+    |   'while' '[' negateablecondition ']' '[' stat+ ']' NL* -> ^( 'while' negateablecondition stat+ )
     ;
 // END: stat
+
+negateablecondition : 'not'^? condition;
 
 condition: expr ( '<'^|'>'^|'<='^|'>='^|'='^ ) expr;
 
