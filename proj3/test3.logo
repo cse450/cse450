@@ -1,8 +1,0 @@
-make "x 2
-make "y 2
-make "z :x + :y + 10
-if :x > 10 [print "yep]
-while [:x >= 10][print "x make "x :x-1]
-make "new (:x + :y) + 27 * :z
-if :y > 20 [if :z < 20 [print "yep]]
-

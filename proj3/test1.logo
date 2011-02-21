@@ -1,2 +1,0 @@
-make "test_num 3 * (7 + 12)  ; This is my comment.
-if not 1 < :x [print 3]
