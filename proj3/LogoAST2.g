@@ -47,7 +47,8 @@ negateablecondition : 'not'^? condition;
 
 condition: expr ( '<'^|'>'^|'<='^|'>='^|'='^ ) expr;
 
-expr: multExpr (('+'^|'-'^) multExpr)* ;
+expr: multExpr (('+'^|'-'^) multExpr)*
+    | 'modulo' expr expr -> ^('modulo' expr expr);
 
 multExpr
     :   primary (('*'^|'/'^) primary)*

@@ -52,6 +52,7 @@ public class Interpreter {
 						case LogoAST2Parser.SUB : 		return op(t);
 						case LogoAST2Parser.MUL : 		return op(t);
 						case LogoAST2Parser.DIV : 		return op(t);
+						case LogoAST2Parser.MOD :     return op(t);
 						case LogoAST2Parser.EQ : 		return eq(t); 
 						case LogoAST2Parser.LT : 		return lt(t);
 						case LogoAST2Parser.GT :    return gt(t);
@@ -195,9 +196,11 @@ public class Interpreter {
 		debug("Entered OP");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
+		
 		if ( a instanceof Float || b instanceof Float ) {
 			float x = ((Number)a).floatValue();
 			float y = ((Number)b).floatValue();
+
 			switch (t.getType()) {
 				case LogoAST2Parser.ADD : return x + y;
 				case LogoAST2Parser.SUB : return x - y;
@@ -211,6 +214,7 @@ public class Interpreter {
 	    //System.out.println(t.getType());
 			int x = ((Number)a).intValue();
 			int y = ((Number)b).intValue();
+			
 			switch (t.getType()) {
 				case LogoAST2Parser.ADD : return x + y;
 				case LogoAST2Parser.SUB : return x - y;
