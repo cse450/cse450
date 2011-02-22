@@ -127,7 +127,7 @@ public class Interpreter {
     }
 
     public Object op(CommonTree t) {
-	System.out.println("Entered OP");
+		System.out.println("Entered OP");
         Object a = exec( (CommonTree)t.getChild(0) );
         Object b = exec( (CommonTree)t.getChild(1) );
         if ( a instanceof Float || b instanceof Float ) {
@@ -156,14 +156,12 @@ public class Interpreter {
     }
 
 	public Object paren(CommonTree t) {
-	System.out.println("Entered PAREN");
+		System.out.println("Entered PAREN");
 		return exec((CommonTree)t.getChild(0));
 	}
 		
-
-
     public Object load(CommonTree t) {
-	return space.get(t.getText());
+		return space.get(t.getText());
     }
 
 

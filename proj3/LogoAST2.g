@@ -1,6 +1,9 @@
 // START: header
 grammar LogoAST2;
-options {output=AST;}
+options {
+	output=AST;
+	ASTLabelType=CommonTree;
+	}
 tokens {
 BLOCK;
 PAREN;
@@ -22,7 +25,7 @@ IF = 'if';
 IFELSE = 'ifelse';
 WHILE = 'while';
 PRINT = 'print';
-MAKE = 'make';
+ASSIGN = 'make';
 
 REF = '"';
 VAL = ':';
@@ -30,7 +33,7 @@ VAL = ':';
 // END: header
 
 // START: stat
-prog:	stat+ ;
+prog:	stat+ ->^(BLOCK stat+);
 
 stat:	'make' ref expr NL*  -> ^('make' ref expr)
     |	'print' expr NL* -> ^('print' expr)
@@ -51,11 +54,12 @@ multExpr
     
 primary
     :   INT
-    |   ref
-    |   '(' expr (',' expr)* ')' -> ^(PAREN expr+)
+    |   val
+    |   '(' expr ')' -> ^(PAREN expr+)
     ;
     
-ref : ((':'^|'"'^) ID);
+ref : ('"' ID) -> ^(REF ID);
+val : (':' ID) -> ^(VAL ID);
 
 
 ID : ( '_' | CHAR )( '_' | CHAR | INT )* ;
