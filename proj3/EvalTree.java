@@ -3,20 +3,16 @@ import java.io.FileInputStream;
 
 public class EvalTree {
     public static void main(String[] args) throws Exception {
-        InputStream input = null;
-        input = System.in;
-		Interpreter interp;
-        if ( args.length == 1 ) {
-			if (args[0] == "-d"){
-        		interp = new Interpreter(true);
-			}
-			else {
-        		interp = new Interpreter();
-			}
-		}
-		else {
-        	interp = new Interpreter();
-		}
-        interp.interp(input);
+			InputStream input = null;
+			input = System.in;
+			
+			Interpreter interpreter = new Interpreter();
+			
+			if (args.length > 0 && args[0].equals("d")){
+				System.out.println("going to debug");
+				interpreter.isdebugging = true;
+			}				
+			
+			interpreter.interp(input);
     }
 }
