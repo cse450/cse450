@@ -86,8 +86,14 @@ public class Interpreter {
 
     public void print(CommonTree t) {
 		debug("PRINT: ");
-        CommonTree expr = (CommonTree)t.getChild(0);
-        System.out.println( exec(expr) );
+        //CommonTree expr = (CommonTree)t.getChild(0);
+        //System.out.println( exec(expr) );
+		// Extended for expression lists! //
+        List<CommonTree> exprs = t.getChildren();
+        for (CommonTree x : exprs) {
+			System.out.print( exec(x) + " ");
+		};
+		System.out.println("");
     }
 
     public void assign(CommonTree t) {
