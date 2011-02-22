@@ -141,6 +141,42 @@ public class Interpreter {
         return false;
     }
 
+    public boolean gt(CommonTree t) {
+		debug("Entered GT");
+        Object a = exec( (CommonTree)t.getChild(0) );
+        Object b = exec( (CommonTree)t.getChild(1) );
+        if ( a instanceof Number && b instanceof Number ) {
+            Number x = (Number)a;
+            Number y = (Number)b;
+            return x.floatValue() > y.floatValue();
+        }
+        return false;
+    }
+
+    public boolean lte(CommonTree t) {
+		debug("Entered LTE");
+        Object a = exec( (CommonTree)t.getChild(0) );
+        Object b = exec( (CommonTree)t.getChild(1) );
+        if ( a instanceof Number && b instanceof Number ) {
+            Number x = (Number)a;
+            Number y = (Number)b;
+            return x.floatValue() <= y.floatValue();
+        }
+        return false;
+    }
+
+    public boolean gte(CommonTree t) {
+		debug("Entered GTE");
+        Object a = exec( (CommonTree)t.getChild(0) );
+        Object b = exec( (CommonTree)t.getChild(1) );
+        if ( a instanceof Number && b instanceof Number ) {
+            Number x = (Number)a;
+            Number y = (Number)b;
+            return x.floatValue() >= y.floatValue();
+        }
+        return false;
+    }
+
     public Object op(CommonTree t) {
 		debug("Entered OP");
         Object a = exec( (CommonTree)t.getChild(0) );
@@ -153,6 +189,7 @@ public class Interpreter {
                 case LogoAST2Parser.SUB : return x - y;
                 case LogoAST2Parser.MUL : return x * y;
                 case LogoAST2Parser.DIV : return x / y;
+                case LogoAST2Parser.MOD : return x % y;
             }
         }
         if ( a instanceof Integer || b instanceof Integer ) {
@@ -165,6 +202,7 @@ public class Interpreter {
                 case LogoAST2Parser.SUB : return x - y;
                 case LogoAST2Parser.MUL : return x * y;
                 case LogoAST2Parser.DIV : return x / y;
+                case LogoAST2Parser.MOD : return x % y;
             }
         }
         return 0;
