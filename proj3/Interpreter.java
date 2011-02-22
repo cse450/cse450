@@ -161,7 +161,7 @@ public class Interpreter {
 	}
 		
     public Object load(CommonTree t) {
-		return space.get(t.getText());
+		return space.get(t.getChild(0).getText());
     }
 
 
