@@ -37,8 +37,8 @@ prog:	stat+ ->^(BLOCK stat+);
 
 stat:	'make' ref expr NL*  -> ^('make' ref expr)
     |	'print' expr NL* -> ^('print' expr)
-    |   'if' negateablecondition '[' stat+ ']' NL* -> ^( 'if' negateablecondition stat+ )
-    |   'while' '[' negateablecondition ']' '[' stat+ ']' NL* -> ^( 'while' negateablecondition stat+ )
+    |   'if' negateablecondition '[' stat+ ']' NL* -> ^( 'if' negateablecondition ^(BLOCK stat+) )
+    |   'while' '[' negateablecondition ']' '[' stat+ ']' NL* -> ^( 'while' negateablecondition ^(BLOCK stat+) )
     ;
 // END: stat
 
