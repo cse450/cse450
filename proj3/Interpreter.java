@@ -57,6 +57,7 @@ public class Interpreter {
 						case LogoAST2Parser.GT :    return gt(t);
 						case LogoAST2Parser.LTE:    return lte(t);
 						case LogoAST2Parser.GTE :   return gte(t);
+						case LogoAST2Parser.NOT: 	  return not(t);
 						case LogoAST2Parser.INT : 		return Integer.parseInt(t.getText()); 
 						case LogoAST2Parser.PAREN : 	return paren(t);
 						case LogoAST2Parser.VAL : 		return load(t);
@@ -184,7 +185,12 @@ public class Interpreter {
 		}
 		return false;
 	}
-		
+	
+	public boolean not(CommonTree t) {
+		debug( "Entered NOT" );
+		return !(Boolean)exec((CommonTree)t.getChild(0));
+	}
+	
 	public Object op(CommonTree t) {
 		debug("Entered OP");
 		Object a = exec( (CommonTree)t.getChild(0) );

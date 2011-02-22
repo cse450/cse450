@@ -1,4 +1,4 @@
-add "not"
+add "not" - DONE
 add "modulo"
 allow references to be printed
 add "ifelse"
