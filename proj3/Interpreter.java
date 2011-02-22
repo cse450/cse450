@@ -15,6 +15,18 @@ public class Interpreter {
     LogoAST2Parser parser;
     MemorySpace space = new MemorySpace("main");
 
+	private boolean isdebugging = false;
+	
+	private void debug (String st)
+	{ 
+		if(isdebugging){
+			System.out.println(st);
+		}
+	}
+
+	public Interpreter(){}
+	public Interpreter(boolean debug){isdebugging = debug;}
+
     public void interp(InputStream input) throws RecognitionException, IOException {
         lex = new LogoAST2Lexer(new ANTLRInputStream(input));
         tokens = new TokenRewriteStream(lex);
@@ -23,7 +35,7 @@ public class Interpreter {
         LogoAST2Parser.prog_return r = parser.prog();
         if ( parser.getNumberOfSyntaxErrors()==0 ) {
             root = (CommonTree)r.getTree();
-            System.out.println("tree: "+root.toStringTree());
+            debug("tree: "+root.toStringTree());
             block(root);
         }
     }
@@ -54,16 +66,16 @@ public class Interpreter {
         }
         catch (Exception e) {
 	    System.out.print("Caught an error in the switch: ");
-		System.out.println(e);
-		System.out.println(t);
+		//System.out.println(e);
+		//System.out.println(t);
         }
         return null;
     }
 
     public void block(CommonTree t) {
-	System.out.println("Entered BLOCK");
+		debug("Entered BLOCK");
         if ( t.getType()!=LogoAST2Parser.BLOCK ) {
-	    System.out.println("Problem with BLOCK");
+	    debug("Problem with BLOCK");
         }
         List<CommonTree> stats = t.getChildren();
         for (CommonTree x : stats) {
@@ -73,23 +85,23 @@ public class Interpreter {
     }
 
     public void print(CommonTree t) {
-		System.out.print("PRINT: ");
+		debug("PRINT: ");
         CommonTree expr = (CommonTree)t.getChild(0);
         System.out.println( exec(expr) );
     }
 
     public void assign(CommonTree t) {
-	System.out.print("Entered ASSIGN: ");
-	System.out.println(t.getChild(0).getChild(0).getText());
+		debug("Entered ASSIGN: ");
+		debug(t.getChild(0).getChild(0).getText());
 
         CommonTree lhs = (CommonTree)t.getChild(0).getChild(0);   // get operands
         CommonTree expr = (CommonTree)t.getChild(1);
         Object value = exec(expr);            // walk/evaluate expr
         space.put(lhs.getText(), value);         // store
-		System.out.println(lhs.getText());
     }
 
     public void whileloop(CommonTree t) {
+		debug("Entered WHILE:");
         CommonTree condStart = (CommonTree)t.getChild(0);
         CommonTree codeStart = (CommonTree)t.getChild(1);
         Boolean c = (Boolean)exec(condStart);
@@ -100,6 +112,7 @@ public class Interpreter {
     }
 
     public void ifstat(CommonTree t) {
+		debug("Entered IF");
         CommonTree condStart = (CommonTree)t.getChild(0);
         CommonTree codeStart = (CommonTree)t.getChild(1);
         CommonTree elseCodeStart = null;
@@ -110,12 +123,14 @@ public class Interpreter {
     }
 
     public boolean eq(CommonTree t) {
+		debug("Entered EQ");
         Object a = exec( (CommonTree)t.getChild(0) );
         Object b = exec( (CommonTree)t.getChild(1) );
         return a.equals(b);
     }
 
     public boolean lt(CommonTree t) {
+		debug("Entered LT");
         Object a = exec( (CommonTree)t.getChild(0) );
         Object b = exec( (CommonTree)t.getChild(1) );
         if ( a instanceof Number && b instanceof Number ) {
@@ -127,7 +142,7 @@ public class Interpreter {
     }
 
     public Object op(CommonTree t) {
-		System.out.println("Entered OP");
+		debug("Entered OP");
         Object a = exec( (CommonTree)t.getChild(0) );
         Object b = exec( (CommonTree)t.getChild(1) );
         if ( a instanceof Float || b instanceof Float ) {
@@ -141,8 +156,8 @@ public class Interpreter {
             }
         }
         if ( a instanceof Integer || b instanceof Integer ) {
-	    System.out.println("Operating on Ints");
-	    System.out.println(t.getType());
+	    //System.out.println("Operating on Ints");
+	    //System.out.println(t.getType());
             int x = ((Number)a).intValue();
             int y = ((Number)b).intValue();
             switch (t.getType()) {
@@ -156,11 +171,12 @@ public class Interpreter {
     }
 
 	public Object paren(CommonTree t) {
-		System.out.println("Entered PAREN");
+		debug("Entered PAREN");
 		return exec((CommonTree)t.getChild(0));
 	}
 		
     public Object load(CommonTree t) {
+		debug("Entered LOAD");
 		return space.get(t.getChild(0).getText());
     }
 
