@@ -48,7 +48,7 @@ public class Interpreter {
 						case LogoAST2Parser.ASSIGN : 	assign(t); break;
 						case LogoAST2Parser.PRINT : 	print(t); break;
 						case LogoAST2Parser.IF : 		ifstat(t); break;
-						case LogoAST2Parser.IFELSE:		ifstat(t); break;
+						case LogoAST2Parser.IFELSE : 	ifelsestat(t); break;
 						case LogoAST2Parser.WHILE : 	whileloop(t); break;
 						case LogoAST2Parser.ADD : 		return op(t);
 						case LogoAST2Parser.SUB : 		return op(t);
@@ -100,7 +100,14 @@ public class Interpreter {
 		@SuppressWarnings("unchecked")
 		List<CommonTree> exprs = t.getChildren();
 		for (CommonTree x : exprs) {
-			System.out.print( exec(x) + " ");
+			if ( x.getType() == LogoAST2Parser.REF )
+			{
+				System.out.print( x.getChild(0).getText() + " " );
+			}
+			else
+			{
+				System.out.print( exec(x) + " ");
+			}
 		};
 		System.out.println("");
 	}
@@ -130,13 +137,29 @@ public class Interpreter {
 		debug("Entered IF");
 		CommonTree condStart = (CommonTree)t.getChild(0);
 		CommonTree codeStart = (CommonTree)t.getChild(1);
-		CommonTree elseCodeStart = null;
-		if ( t.getChildCount()==3 ) elseCodeStart = (CommonTree)t.getChild(2);
-			Boolean c = (Boolean)exec(condStart);
-			if ( ((Boolean)c).booleanValue() ) exec(codeStart);
-			else if ( elseCodeStart!=null ) exec(elseCodeStart);
+		Boolean c = (Boolean)exec(condStart);
+		if ( ((Boolean)c).booleanValue() ) exec(codeStart);
 	}
 
+	public void ifelsestat(CommonTree t) {
+		debug("Entered IFELSE");
+		CommonTree condStart = (CommonTree)t.getChild(0);
+		CommonTree codeStart = (CommonTree)t.getChild(1);
+		CommonTree elseStart = (CommonTree)t.getChild(2);
+		
+		Boolean c = (Boolean)exec(condStart);
+		if ( ((Boolean)c).booleanValue() )
+		{
+			debug( "in if codeblock" );
+			exec(codeStart);
+		}
+		else
+		{
+			debug( "in else codeblock" );
+			exec( elseStart );
+		}
+	}
+	
 	public boolean eq(CommonTree t) {
 		debug("Entered EQ");
 		Object a = exec( (CommonTree)t.getChild(0) );

@@ -1,0 +1,2 @@
+make "x 1
+while [not :x > 10] [ if modulo :x 2 = 0 [print :x] make "x :x + 1]
