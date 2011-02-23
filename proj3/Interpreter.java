@@ -96,7 +96,14 @@ public class Interpreter {
 		// Extended for expression lists! //
 		List<CommonTree> exprs = t.getChildren();
 		for (CommonTree x : exprs) {
-			System.out.print( exec(x) + " ");
+			if ( x.getType() == LogoAST2Parser.REF )
+			{
+				System.out.print( x.getChild(0).getText() + " " );
+			}
+			else
+			{
+				System.out.print( exec(x) + " ");
+			}
 		};
 		System.out.println("");
 	}

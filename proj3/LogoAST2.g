@@ -35,16 +35,18 @@ VAL = ':';
 // START: stat
 prog: multistat;
 
-multistat : stat+ ->^(BLOCK stat+); 
+multistat : stat+ -> ^(BLOCK stat+); 
 
 stat:	'make' ref expr NL*  -> ^('make' ref expr)
-    |	'print' expr NL* -> ^('print' expr)
-    |	'(print' expr+ ')' NL* -> ^('print' expr+)
+    |	'print' printablestat NL* -> ^('print' printablestat)
+    |	'(print' printablestat+ ')' NL* -> ^('print' printablestat+)
     |   'if' negateablecondition '[' multistat ']' NL* -> ^( 'if' negateablecondition multistat )
     |	'ifelse' negateablecondition '[' ifcode=multistat ']' '[' elsecode=multistat ']' NL* -> ^( 'ifelse' negateablecondition $ifcode $elsecode )
     |   'while' '[' negateablecondition ']' '[' multistat ']' NL* -> ^( 'while' negateablecondition multistat )
     ;
 // END: stat
+
+printablestat: expr|ref;
 
 negateablecondition : 'not'^? condition;
 
