@@ -38,8 +38,9 @@ prog:	stat+ ->^(BLOCK stat+);
 stat:	'make' ref expr NL*  -> ^('make' ref expr)
     |	'print' expr NL* -> ^('print' expr)
     |	'(print' expr+ ')' NL* -> ^('print' expr+)
-    |   'if' negateablecondition '[' stat+ ']' NL* -> ^( 'if' negateablecondition ^(BLOCK stat+) )
-    |   'while' '[' negateablecondition ']' '[' stat+ ']' NL* -> ^( 'while' negateablecondition ^(BLOCK stat+) )
+    |   'if' NL* negateablecondition NL* '[' NL* stat+ NL* ']' NL* -> ^( 'if' negateablecondition ^(BLOCK stat+) )
+    |   'while' NL* '[' NL* negateablecondition NL* ']' NL* '[' NL* stat+ NL* ']' NL* -> ^( 'while' negateablecondition ^(BLOCK stat+) )
+    |	'ifelse' NL* negateablecondition NL* '[' NL* stat+ NL* ']' NL* '[' NL* stat+ NL* ']' NL* -> ^( 'ifelse' negateablecondition ^(BLOCK stat+) )
     ;
 // END: stat
 
@@ -57,6 +58,7 @@ multExpr
 primary
     :   INT
     |   val
+    |	ref
     |   '(' expr ')' -> ^(PAREN expr+)
     ;
     
