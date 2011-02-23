@@ -40,13 +40,13 @@ multistat : stat+ -> ^(BLOCK stat+);
 stat:	'make' ref expr NL*  -> ^('make' ref expr)
     |	'print' printablestat NL* -> ^('print' printablestat)
     |	'(print' printablestat+ ')' NL* -> ^('print' printablestat+)
-    |   'if' negateablecondition '[' multistat ']' NL* -> ^( 'if' negateablecondition multistat )
-    |	'ifelse' negateablecondition '[' ifcode=multistat ']' '[' elsecode=multistat ']' NL* -> ^( 'ifelse' negateablecondition $ifcode $elsecode )
-    |   'while' '[' negateablecondition ']' '[' multistat ']' NL* -> ^( 'while' negateablecondition multistat )
+    |   'if' NL* negateablecondition NL* '[' NL* multistat NL* ']' NL* -> ^( 'if' negateablecondition multistat )
+    |	'ifelse' NL* negateablecondition NL* '[' NL* ifcode=multistat NL* ']' NL* '[' NL* elsecode=multistat NL* ']' NL* -> ^( 'ifelse' negateablecondition $ifcode $elsecode )
+    |   'while' NL* '[' NL* negateablecondition NL* ']' NL* '[' NL* multistat NL* ']' NL* -> ^( 'while' negateablecondition multistat )
     ;
 // END: stat
 
-printablestat: expr|ref;
+printablestat: expr;//|ref;
 
 negateablecondition : 'not'^? condition;
 
