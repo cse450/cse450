@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Stack;
+import java.util.*;
 
 public class Interpreter {
     
@@ -47,21 +48,22 @@ public class Interpreter {
 						case LogoAST2Parser.ASSIGN : 	assign(t); break;
 						case LogoAST2Parser.PRINT : 	print(t); break;
 						case LogoAST2Parser.IF : 		ifstat(t); break;
-						case LogoAST2Parser.IFELSE : ifelsestat(t); break;
+						case LogoAST2Parser.IFELSE : 	ifelsestat(t); break;
 						case LogoAST2Parser.WHILE : 	whileloop(t); break;
 						case LogoAST2Parser.ADD : 		return op(t);
 						case LogoAST2Parser.SUB : 		return op(t);
 						case LogoAST2Parser.MUL : 		return op(t);
 						case LogoAST2Parser.DIV : 		return op(t);
-						case LogoAST2Parser.MOD :     return op(t);
+						case LogoAST2Parser.MOD :     	return op(t);
 						case LogoAST2Parser.EQ : 		return eq(t); 
 						case LogoAST2Parser.LT : 		return lt(t);
-						case LogoAST2Parser.GT :    return gt(t);
-						case LogoAST2Parser.LTE:    return lte(t);
-						case LogoAST2Parser.GTE :   return gte(t);
-						case LogoAST2Parser.NOT: 	  return not(t);
+						case LogoAST2Parser.GT :    	return gt(t);
+						case LogoAST2Parser.LTE :    	return lte(t);
+						case LogoAST2Parser.GTE :   	return gte(t);
+						case LogoAST2Parser.NOT : 	  	return not(t);
 						case LogoAST2Parser.INT : 		return Integer.parseInt(t.getText()); 
 						case LogoAST2Parser.PAREN : 	return paren(t);
+						case LogoAST2Parser.REF :		return ref(t);
 						case LogoAST2Parser.VAL : 		return load(t);
 		
 						default : // catch unhandled node types
@@ -82,6 +84,7 @@ public class Interpreter {
 		if ( t.getType()!=LogoAST2Parser.BLOCK ) {
 			debug("Problem with BLOCK");
 		}
+		@SuppressWarnings("unchecked")
 		List<CommonTree> stats = t.getChildren();
 		for (CommonTree x : stats) {
 			// System.out.println("Running expr"+x.toStringTree());
@@ -94,6 +97,7 @@ public class Interpreter {
 		//CommonTree expr = (CommonTree)t.getChild(0);
 		//System.out.println( exec(expr) );
 		// Extended for expression lists! //
+		@SuppressWarnings("unchecked")
 		List<CommonTree> exprs = t.getChildren();
 		for (CommonTree x : exprs) {
 			if ( x.getType() == LogoAST2Parser.REF )
@@ -258,5 +262,10 @@ public class Interpreter {
 	public Object load(CommonTree t) {
 		debug("Entered LOAD");
 		return space.get(t.getChild(0).getText());
+	}
+
+	public Object ref(CommonTree t) {
+		debug("Entered REF");
+		return t.getChild(0).getText();
 	}
 }

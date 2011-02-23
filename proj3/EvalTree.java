@@ -1,7 +1,9 @@
 import java.io.InputStream;
 import java.io.FileInputStream;
+import java.util.*;
 
 public class EvalTree {
+	@SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
 			InputStream input = null;
 			input = System.in;

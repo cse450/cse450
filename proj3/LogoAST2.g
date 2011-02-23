@@ -62,6 +62,7 @@ multExpr
 primary
     :   INT
     |   val
+    |	ref
     |   '(' expr ')' -> ^(PAREN expr+)
     ;
     
