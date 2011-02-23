@@ -33,13 +33,16 @@ VAL = ':';
 // END: header
 
 // START: stat
-prog:	stat+ ->^(BLOCK stat+);
+prog: multistat;
+
+multistat : stat+ ->^(BLOCK stat+); 
 
 stat:	'make' ref expr NL*  -> ^('make' ref expr)
     |	'print' expr NL* -> ^('print' expr)
     |	'(print' expr+ ')' NL* -> ^('print' expr+)
-    |   'if' negateablecondition '[' stat+ ']' NL* -> ^( 'if' negateablecondition ^(BLOCK stat+) )
-    |   'while' '[' negateablecondition ']' '[' stat+ ']' NL* -> ^( 'while' negateablecondition ^(BLOCK stat+) )
+    |   'if' negateablecondition '[' multistat ']' NL* -> ^( 'if' negateablecondition multistat )
+    |	'ifelse' negateablecondition '[' ifcode=multistat ']' '[' elsecode=multistat ']' NL* -> ^( 'ifelse' negateablecondition $ifcode $elsecode )
+    |   'while' '[' negateablecondition ']' '[' multistat ']' NL* -> ^( 'while' negateablecondition multistat )
     ;
 // END: stat
 
