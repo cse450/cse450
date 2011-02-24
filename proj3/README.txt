@@ -1,4 +1,4 @@
-Project 2 Readme
+Project 3 Readme
 Group Members:
 Dennis Cornwell
 Luke Davis
