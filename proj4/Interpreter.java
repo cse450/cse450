@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Stack;
+import java.util.ArrayDeque;
 import java.util.*;
 
 public class Interpreter {
@@ -15,10 +16,17 @@ public class Interpreter {
     LogoTurtleLexer lex;              // lexer/parser are part of the processor
     LogoTurtleParser parser;
 
-    Stack scopeStack = new Stack();
-	scopeStack.push( new MemorySpace("main") );
+    ArrayDeque <MemorySpace> scopeStack = new ArrayDeque <MemorySpace> ();
+
+
 
 	public boolean isdebugging = false;
+
+	public Interpreter()
+	{
+		scopeStack.add( new MemorySpace("main") );
+	}
+
 	
 	private void debug (String st)
 	{ 
@@ -26,8 +34,6 @@ public class Interpreter {
 			System.out.println(st);
 		}
 	}
-
-	
 
 	public void interp(InputStream input) throws RecognitionException, IOException {
 			lex = new LogoTurtleLexer(new ANTLRInputStream(input));
@@ -121,7 +127,7 @@ public class Interpreter {
 		CommonTree lhs = (CommonTree)t.getChild(0).getChild(0);   // get operands
 		CommonTree expr = (CommonTree)t.getChild(1);
 		Object value = exec(expr);            // walk/evaluate expr
-		space.put(lhs.getText(), value);         // store
+		scopeStack.peekLast().put(lhs.getText(), value);         // store
 	}
 
 	public void whileloop(CommonTree t) {
@@ -263,7 +269,7 @@ public class Interpreter {
 		
 	public Object load(CommonTree t) {
 		debug("Entered LOAD");
-		return space.get(t.getChild(0).getText());
+		return scopeStack.peekLast().get(t.getChild(0).getText());
 	}
 
 	public Object ref(CommonTree t) {
