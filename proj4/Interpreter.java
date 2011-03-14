@@ -14,7 +14,8 @@ public class Interpreter {
     TokenRewriteStream tokens;
     LogoAST2Lexer lex;              // lexer/parser are part of the processor
     LogoAST2Parser parser;
-    MemorySpace space = new MemorySpace("main");
+    Stack scopeStack = new Stack();
+	scopeStack.push( new MemorySpace("main") );
 
 	public boolean isdebugging = false;
 	
