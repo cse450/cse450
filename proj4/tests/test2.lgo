@@ -1,0 +1,12 @@
+make "my_num 5
+make "num2  6    ; Do comments work?
+make "result :my_num + :num2
+make "result2 2 * (:my_num + 7) / 4
+; The next line intentionally left blank!
+
+; Now lets print some stuff...
+print :num2
+print :result2
+print :result 
+print :result - :result2
+; comment!

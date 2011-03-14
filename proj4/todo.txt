@@ -1,0 +1,4 @@
+add "not" - DONE
+add "modulo" - DONE
+allow references to be printed - DONE
+add "ifelse" - DONE
