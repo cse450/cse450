@@ -1,5 +1,5 @@
 // START: header
-grammar LogoAST2;
+grammar LogoTurtle;
 options {
 	output=AST;
 	ASTLabelType=CommonTree;
