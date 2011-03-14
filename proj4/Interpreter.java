@@ -12,8 +12,9 @@ public class Interpreter {
     
     CommonTree root;               // the AST represents our code memory
     TokenRewriteStream tokens;
-    LogoAST2Lexer lex;              // lexer/parser are part of the processor
-    LogoAST2Parser parser;
+    LogoTurtleLexer lex;              // lexer/parser are part of the processor
+    LogoTurtleParser parser;
+
     Stack scopeStack = new Stack();
 	scopeStack.push( new MemorySpace("main") );
 
@@ -29,11 +30,11 @@ public class Interpreter {
 	
 
 	public void interp(InputStream input) throws RecognitionException, IOException {
-			lex = new LogoAST2Lexer(new ANTLRInputStream(input));
+			lex = new LogoTurtleLexer(new ANTLRInputStream(input));
 			tokens = new TokenRewriteStream(lex);
-			parser = new LogoAST2Parser(tokens);
+			parser = new LogoTurtleParser(tokens);
 
-			LogoAST2Parser.prog_return r = parser.prog();
+			LogoTurtleParser.prog_return r = parser.prog();
 			if ( parser.getNumberOfSyntaxErrors()==0 ) {
 					root = (CommonTree)r.getTree();
 					debug("tree: "+root.toStringTree());
@@ -45,27 +46,27 @@ public class Interpreter {
 	public Object exec(CommonTree t) {
 		try {
 				switch ( t.getType() ) {
-						case LogoAST2Parser.BLOCK : 	block(t); break;
-						case LogoAST2Parser.ASSIGN : 	assign(t); break;
-						case LogoAST2Parser.PRINT : 	print(t); break;
-						case LogoAST2Parser.IF : 		ifstat(t); break;
-						case LogoAST2Parser.IFELSE : 	ifelsestat(t); break;
-						case LogoAST2Parser.WHILE : 	whileloop(t); break;
-						case LogoAST2Parser.ADD : 		return op(t);
-						case LogoAST2Parser.SUB : 		return op(t);
-						case LogoAST2Parser.MUL : 		return op(t);
-						case LogoAST2Parser.DIV : 		return op(t);
-						case LogoAST2Parser.MOD :     	return op(t);
-						case LogoAST2Parser.EQ : 		return eq(t); 
-						case LogoAST2Parser.LT : 		return lt(t);
-						case LogoAST2Parser.GT :    	return gt(t);
-						case LogoAST2Parser.LTE :    	return lte(t);
-						case LogoAST2Parser.GTE :   	return gte(t);
-						case LogoAST2Parser.NOT : 	  	return not(t);
-						case LogoAST2Parser.INT : 		return Integer.parseInt(t.getText()); 
-						case LogoAST2Parser.PAREN : 	return paren(t);
-						case LogoAST2Parser.REF :		return ref(t);
-						case LogoAST2Parser.VAL : 		return load(t);
+						case LogoTurtleParser.BLOCK : 	block(t); break;
+						case LogoTurtleParser.ASSIGN : 	assign(t); break;
+						case LogoTurtleParser.PRINT : 	print(t); break;
+						case LogoTurtleParser.IF : 		ifstat(t); break;
+						case LogoTurtleParser.IFELSE : 	ifelsestat(t); break;
+						case LogoTurtleParser.WHILE : 	whileloop(t); break;
+						case LogoTurtleParser.ADD : 		return op(t);
+						case LogoTurtleParser.SUB : 		return op(t);
+						case LogoTurtleParser.MUL : 		return op(t);
+						case LogoTurtleParser.DIV : 		return op(t);
+						case LogoTurtleParser.MOD :     	return op(t);
+						case LogoTurtleParser.EQ : 		return eq(t); 
+						case LogoTurtleParser.LT : 		return lt(t);
+						case LogoTurtleParser.GT :    	return gt(t);
+						case LogoTurtleParser.LTE :    	return lte(t);
+						case LogoTurtleParser.GTE :   	return gte(t);
+						case LogoTurtleParser.NOT : 	  	return not(t);
+						case LogoTurtleParser.INT : 		return Integer.parseInt(t.getText()); 
+						case LogoTurtleParser.PAREN : 	return paren(t);
+						case LogoTurtleParser.REF :		return ref(t);
+						case LogoTurtleParser.VAL : 		return load(t);
 		
 						default : // catch unhandled node types
 								throw new UnsupportedOperationException("Node "+
@@ -82,7 +83,7 @@ public class Interpreter {
 
 	public void block(CommonTree t) {
 		debug("Entered BLOCK");
-		if ( t.getType()!=LogoAST2Parser.BLOCK ) {
+		if ( t.getType()!=LogoTurtleParser.BLOCK ) {
 			debug("Problem with BLOCK");
 		}
 		@SuppressWarnings("unchecked")
@@ -101,7 +102,7 @@ public class Interpreter {
 		@SuppressWarnings("unchecked")
 		List<CommonTree> exprs = t.getChildren();
 		for (CommonTree x : exprs) {
-			if ( x.getType() == LogoAST2Parser.REF )
+			if ( x.getType() == LogoTurtleParser.REF )
 			{
 				System.out.print( x.getChild(0).getText() + " " );
 			}
@@ -231,11 +232,11 @@ public class Interpreter {
 			float y = ((Number)b).floatValue();
 
 			switch (t.getType()) {
-				case LogoAST2Parser.ADD : return x + y;
-				case LogoAST2Parser.SUB : return x - y;
-				case LogoAST2Parser.MUL : return x * y;
-				case LogoAST2Parser.DIV : return x / y;
-				case LogoAST2Parser.MOD : return x % y;
+				case LogoTurtleParser.ADD : return x + y;
+				case LogoTurtleParser.SUB : return x - y;
+				case LogoTurtleParser.MUL : return x * y;
+				case LogoTurtleParser.DIV : return x / y;
+				case LogoTurtleParser.MOD : return x % y;
 			}
 		}
 		if ( a instanceof Integer || b instanceof Integer ) {
@@ -245,11 +246,11 @@ public class Interpreter {
 			int y = ((Number)b).intValue();
 			
 			switch (t.getType()) {
-				case LogoAST2Parser.ADD : return x + y;
-				case LogoAST2Parser.SUB : return x - y;
-				case LogoAST2Parser.MUL : return x * y;
-				case LogoAST2Parser.DIV : return x / y;
-				case LogoAST2Parser.MOD : return x % y;
+				case LogoTurtleParser.ADD : return x + y;
+				case LogoTurtleParser.SUB : return x - y;
+				case LogoTurtleParser.MUL : return x * y;
+				case LogoTurtleParser.DIV : return x / y;
+				case LogoTurtleParser.MOD : return x % y;
 			}
 		}
 		return 0;
