@@ -17,6 +17,7 @@ public class Interpreter {
     LogoTurtleParser parser;
 
     ArrayDeque <MemorySpace> scopeStack = new ArrayDeque <MemorySpace> ();
+	Iterator <MemorySpace> scopeIter; 
 
 
 
@@ -269,7 +270,14 @@ public class Interpreter {
 		
 	public Object load(CommonTree t) {
 		debug("Entered LOAD");
-		return scopeStack.peekLast().get(t.getChild(0).getText());
+		scopeIter = scopeStack.descendingIterator();
+		while( scopeIter.hasNext() )
+		{
+			MemorySpace tmp = scopeIter.next();
+			if (tmp.has(t.getChild(0).getText()))
+				return tmp.get(t.getChild(0).getText());
+		}
+		return null;
 	}
 
 	public Object ref(CommonTree t) {

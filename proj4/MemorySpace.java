@@ -22,4 +22,6 @@ public class MemorySpace {
     public void put(String id, Object value) { members.put(id, value); }
 
     public String toString() { return name+":"+members; }
+	
+	public boolean has(String id) { return members.containsKey(id); }
 }
