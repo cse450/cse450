@@ -8,9 +8,6 @@ tokens {
 BLOCK;
 PAREN;
 
-TYPEINT;
-TYPEFLOAT;
-
 ADD = '+';
 SUB = '-';
 MUL = '*';
@@ -63,8 +60,8 @@ multExpr
     ;
     
 primary
-    :   INT -> ^( TYPEINT INT )
-    |   FLOAT -> ^( TYPEFLOAT FLOAT )
+    :   INT
+    |   FLOAT
     |   val
     |	ref
     |   '(' expr ')' -> ^(PAREN expr+)

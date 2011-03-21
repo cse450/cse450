@@ -54,8 +54,6 @@ public class Interpreter {
 		try {
 				switch ( t.getType() ) {
 						case LogoTurtleParser.BLOCK : 	block(t); break;
-						case LogoTurtleParser.TYPEINT : return t;
-						case LogoTurtleParser.TYPEFLOAT : return t;
 						case LogoTurtleParser.ASSIGN : 	assign(t); break;
 						case LogoTurtleParser.PRINT : 	print(t); break;
 						case LogoTurtleParser.IF : 		ifstat(t); break;
@@ -72,8 +70,8 @@ public class Interpreter {
 						case LogoTurtleParser.LTE :    	return lte(t);
 						case LogoTurtleParser.GTE :   	return gte(t);
 						case LogoTurtleParser.NOT : 	  	return not(t);
-						case LogoTurtleParser.INT : 		return Integer.parseInt(t.getText());
-						case LogoTurtleParser.FLOAT :    return Float.parseFloat(t.getText());
+						case LogoTurtleParser.INT : 		return new Value( Integer.parseInt(t.getText()), LogoTurtleParser.INT );
+						case LogoTurtleParser.FLOAT :    return new Value( Float.parseFloat(t.getText()), LogoTurtleParser.FLOAT );
 						case LogoTurtleParser.PAREN : 	return paren(t);
 						case LogoTurtleParser.REF :		return ref(t);
 						case LogoTurtleParser.VAL : 		return load(t);
@@ -120,7 +118,7 @@ public class Interpreter {
 			}
 			else
 			{
-				System.out.print( exec(x) + " ");
+				System.out.print( ((Value)exec(x)).getValueBasedOnType() + " ");
 			}
 		};
 		System.out.println("");
@@ -128,11 +126,13 @@ public class Interpreter {
 
 	public void assign(CommonTree t) {
 		debug("Entered ASSIGN: ");
-		debug(t.getChild(0).getChild(0).getText());
 
 		CommonTree lhs = (CommonTree)t.getChild(0).getChild(0);   // get operands
 		CommonTree expr = (CommonTree)t.getChild(1);
-		Object value = exec(expr);            // walk/evaluate expr
+		Object value = exec(expr);
+
+		debug( t.getChild(0).getChild(0).getText() + " = " + ((Value)value).getValueBasedOnType() );
+		
 		scopeStack.peekLast().put(lhs.getText(), value);         // store
 	}
 
@@ -176,8 +176,8 @@ public class Interpreter {
 	
 	public boolean eq(CommonTree t) {
 		debug("Entered EQ");
-		Object a = exec( (CommonTree)t.getChild(0) );
-		Object b = exec( (CommonTree)t.getChild(1) );
+		Value a = (Value)exec( (CommonTree)t.getChild(0) );
+		Value b = (Value)exec( (CommonTree)t.getChild(1) );
 		return a.equals(b);
 	}
 
@@ -185,9 +185,9 @@ public class Interpreter {
 		debug("Entered LT");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
-		if ( a instanceof Number && b instanceof Number ) {
-			Number x = (Number)a;
-			Number y = (Number)b;
+		if ( a instanceof Value && b instanceof Value ) {
+			Value x = (Value)a;
+			Value y = (Value)b;
 			return x.floatValue() < y.floatValue();
 		}
 		return false;
@@ -197,9 +197,9 @@ public class Interpreter {
 		debug("Entered GT");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
-		if ( a instanceof Number && b instanceof Number ) {
-			Number x = (Number)a;
-			Number y = (Number)b;
+		if ( a instanceof Value && b instanceof Value ) {
+			Value x = (Value)a;
+			Value y = (Value)b;
 			return x.floatValue() > y.floatValue();
 		}
 		return false;
@@ -209,9 +209,9 @@ public class Interpreter {
 		debug("Entered LTE");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
-		if ( a instanceof Number && b instanceof Number ) {
-			Number x = (Number)a;
-			Number y = (Number)b;
+		if ( a instanceof Value && b instanceof Value ) {
+			Value x = (Value)a;
+			Value y = (Value)b;
 			return x.floatValue() <= y.floatValue();
 		}
 		return false;
@@ -221,9 +221,9 @@ public class Interpreter {
 		debug("Entered GTE");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
-		if ( a instanceof Number && b instanceof Number ) {
-			Number x = (Number)a;
-			Number y = (Number)b;
+		if ( a instanceof Value && b instanceof Value ) {
+			Value x = (Value)a;
+			Value y = (Value)b;
 			return x.floatValue() >= y.floatValue();
 		}
 		return false;
@@ -234,46 +234,43 @@ public class Interpreter {
 		return !(Boolean)exec((CommonTree)t.getChild(0));
 	}
 	
-	public Object op(CommonTree oper) throws ParseException {
+	public Value op(CommonTree oper) throws ParseException {
 		debug("Entered OP");
 		
-		CommonTree typeA = null;
-		CommonTree typeB = null;
+		Value a = null;
+		Value b = null;
 		
 		try {
-			typeA = (CommonTree)exec( (CommonTree)oper.getChild(0) );
-			typeB = (CommonTree)exec( (CommonTree)oper.getChild(1) );
+			a = (Value)exec( (CommonTree)(oper.getChild(0) ) );
+		  b = (Value)exec( (CommonTree)(oper.getChild(1) ) );
 		}
-		catch ( ClassCastException ex ){
-			throw new ParseException( "Cannot perform arithmetic operations on non-number types.", 0 );
+		catch ( ClassCastException ex ) {
+			throw new ParseException( "Cannot perform arithmetic operations on non-value types.", 0 );
 		}
 		
-		CommonTree a = (CommonTree)((CommonTree)typeA).getChild(0);
-		CommonTree b = (CommonTree)((CommonTree)typeB).getChild(0);
+		Value retVal = null;
 		
-		Object retVal = null;
-		
-		if ( isInt( typeA ) && isInt( typeB ) ) {
+		if ( isInt( a ) && isInt( b ) ) {
 	    
-			int x = ((Number)exec(a)).intValue();
-			int y = ((Number)exec(b)).intValue();
+			int x = a.intValue();
+			int y = b.intValue();
 			
-			retVal = performOperation( oper, x, y );
+			retVal = new Value( performOperation( oper, x, y ), LogoTurtleParser.INT );
 		}
-		else if ( isFloat(typeA) && isFloat(typeB) ) {
-			float x = ((Number)exec(a)).floatValue();
-			float y = ((Number)exec(b)).floatValue();
+		else if ( isFloat( a ) && isFloat( b ) ) {
+			float x = a.floatValue();
+			float y = b.floatValue();
 
-		  retVal = performOperation( oper, x, y );
+		  retVal = new Value( performOperation( oper, x, y ), LogoTurtleParser.FLOAT );
 		}
-		else if ( ( isFloat( typeA ) && isInt( typeB ) ) || 
-		          ( isInt( typeA ) && isFloat( typeB ) ) ) {
+		else if ( ( isFloat( a ) && isInt( b ) ) || 
+		          ( isInt( a ) && isFloat( b ) ) ) {
 			System.out.println( "Warning: Promoting integer to float." );
 			
-			float x = ((Number)exec(a)).floatValue();
-			float y = ((Number)exec(b)).floatValue();
+			float x = a.floatValue();
+			float y = b.floatValue();
 			
-			retVal =  performOperation( oper, x, y );
+			retVal =  new Value( performOperation( oper, x, y ), LogoTurtleParser.FLOAT );
 		}
 		
 		return retVal;
@@ -305,12 +302,12 @@ public class Interpreter {
 		}
 	}
 		
-	public boolean isInt( CommonTree node ) {
-		return node.getType() == LogoTurtleParser.TYPEINT;
+	public boolean isInt( Value val ) {
+		return val.getType() == LogoTurtleParser.INT;
 	}
 	
-	public boolean isFloat( CommonTree node ) {
-		return node.getType() == LogoTurtleParser.TYPEFLOAT;
+	public boolean isFloat( Value val ) {
+		return val.getType() == LogoTurtleParser.FLOAT;
 	}
 	
 	public Object paren(CommonTree t) {
