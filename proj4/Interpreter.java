@@ -53,27 +53,30 @@ public class Interpreter {
 	public Object exec(CommonTree t) {
 		try {
 				switch ( t.getType() ) {
-						case LogoTurtleParser.BLOCK : 	block(t); break;
-						case LogoTurtleParser.ASSIGN : 	assign(t); break;
-						case LogoTurtleParser.PRINT : 	print(t); break;
-						case LogoTurtleParser.IF : 		ifstat(t); break;
-						case LogoTurtleParser.IFELSE : 	ifelsestat(t); break;
-						case LogoTurtleParser.WHILE : 	whileloop(t); break;
+						case LogoTurtleParser.BLOCK : 		block(t); 		break;
+						case LogoTurtleParser.ASSIGN : 		assign(t); 		break;
+						case LogoTurtleParser.PRINT : 		print(t); 		break;
+						case LogoTurtleParser.IF : 			ifstat(t); 		break;
+						case LogoTurtleParser.IFELSE : 		ifelsestat(t); 	break;
+						case LogoTurtleParser.WHILE : 		whileloop(t); 	break;
+						case LogoTurtleParser.TO :			fndef(t); 		break;
+
 						case LogoTurtleParser.ADD : 		return op(t);
 						case LogoTurtleParser.SUB : 		return op(t);
 						case LogoTurtleParser.MUL : 		return op(t);
 						case LogoTurtleParser.DIV : 		return op(t);
 						case LogoTurtleParser.MOD :     	return op(t);
-						case LogoTurtleParser.EQ : 		return eq(t); 
-						case LogoTurtleParser.LT : 		return lt(t);
-						case LogoTurtleParser.GT :    	return gt(t);
-						case LogoTurtleParser.LTE :    	return lte(t);
-						case LogoTurtleParser.GTE :   	return gte(t);
+						case LogoTurtleParser.EQ : 			return eq(t); 
+						case LogoTurtleParser.LT : 			return lt(t);
+						case LogoTurtleParser.GT :    		return gt(t);
+						case LogoTurtleParser.LTE :    		return lte(t);
+						case LogoTurtleParser.GTE :   		return gte(t);
 						case LogoTurtleParser.NOT : 	  	return not(t);
 						case LogoTurtleParser.INT : 		return Integer.parseInt(t.getText()); 
-						case LogoTurtleParser.PAREN : 	return paren(t);
-						case LogoTurtleParser.REF :		return ref(t);
+						case LogoTurtleParser.PAREN : 		return paren(t);
+						case LogoTurtleParser.REF :			return ref(t);
 						case LogoTurtleParser.VAL : 		return load(t);
+
 		
 						default : // catch unhandled node types
 								throw new UnsupportedOperationException("Node "+
@@ -86,6 +89,12 @@ public class Interpreter {
 			System.out.println(e);
 		}
 			return null;
+	}
+
+	public void fndef(CommonTree t) {
+		debug("Entered TO");
+
+
 	}
 
 	public void block(CommonTree t) {
