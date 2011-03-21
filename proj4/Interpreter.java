@@ -87,6 +87,7 @@ public class Interpreter {
 			System.out.println("'");
 			System.out.print( "    Exception thrown: " );
 			System.out.println(e);
+			System.exit(1);
 		}
 			return null;
 	}
