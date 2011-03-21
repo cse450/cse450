@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.ArrayDeque;
 import java.util.*;
+import java.text.ParseException;
 
 public class Interpreter {
     
@@ -53,6 +54,8 @@ public class Interpreter {
 		try {
 				switch ( t.getType() ) {
 						case LogoTurtleParser.BLOCK : 	block(t); break;
+						case LogoTurtleParser.TYPEINT : return t;
+						case LogoTurtleParser.TYPEFLOAT : return t;
 						case LogoTurtleParser.ASSIGN : 	assign(t); break;
 						case LogoTurtleParser.PRINT : 	print(t); break;
 						case LogoTurtleParser.IF : 		ifstat(t); break;
@@ -69,7 +72,8 @@ public class Interpreter {
 						case LogoTurtleParser.LTE :    	return lte(t);
 						case LogoTurtleParser.GTE :   	return gte(t);
 						case LogoTurtleParser.NOT : 	  	return not(t);
-						case LogoTurtleParser.INT : 		return Integer.parseInt(t.getText()); 
+						case LogoTurtleParser.INT : 		return Integer.parseInt(t.getText());
+						case LogoTurtleParser.FLOAT :    return Float.parseFloat(t.getText());
 						case LogoTurtleParser.PAREN : 	return paren(t);
 						case LogoTurtleParser.REF :		return ref(t);
 						case LogoTurtleParser.VAL : 		return load(t);
@@ -80,8 +84,10 @@ public class Interpreter {
 				}
 		}
 		catch (Exception e) {
-			System.out.print("Caught an error in the switch: ");
-			System.out.println(t);
+			System.out.print("Error: Interpretation failed at '");
+			System.out.print(t);
+			System.out.println("'");
+			System.out.print( "    Exception thrown: " );
 			System.out.println(e);
 		}
 			return null;
@@ -228,40 +234,85 @@ public class Interpreter {
 		return !(Boolean)exec((CommonTree)t.getChild(0));
 	}
 	
-	public Object op(CommonTree t) {
+	public Object op(CommonTree oper) throws ParseException {
 		debug("Entered OP");
-		Object a = exec( (CommonTree)t.getChild(0) );
-		Object b = exec( (CommonTree)t.getChild(1) );
 		
-		if ( a instanceof Float || b instanceof Float ) {
-			float x = ((Number)a).floatValue();
-			float y = ((Number)b).floatValue();
-
-			switch (t.getType()) {
-				case LogoTurtleParser.ADD : return x + y;
-				case LogoTurtleParser.SUB : return x - y;
-				case LogoTurtleParser.MUL : return x * y;
-				case LogoTurtleParser.DIV : return x / y;
-				case LogoTurtleParser.MOD : return x % y;
-			}
+		CommonTree typeA = null;
+		CommonTree typeB = null;
+		
+		try {
+			typeA = (CommonTree)exec( (CommonTree)oper.getChild(0) );
+			typeB = (CommonTree)exec( (CommonTree)oper.getChild(1) );
 		}
-		if ( a instanceof Integer || b instanceof Integer ) {
-	    //System.out.println("Operating on Ints");
-	    //System.out.println(t.getType());
-			int x = ((Number)a).intValue();
-			int y = ((Number)b).intValue();
+		catch ( ClassCastException ex ){
+			throw new ParseException( "Cannot perform arithmetic operations on non-number types.", 0 );
+		}
+		
+		CommonTree a = (CommonTree)((CommonTree)typeA).getChild(0);
+		CommonTree b = (CommonTree)((CommonTree)typeB).getChild(0);
+		
+		Object retVal = null;
+		
+		if ( isInt( typeA ) && isInt( typeB ) ) {
+	    
+			int x = ((Number)exec(a)).intValue();
+			int y = ((Number)exec(b)).intValue();
 			
-			switch (t.getType()) {
-				case LogoTurtleParser.ADD : return x + y;
-				case LogoTurtleParser.SUB : return x - y;
-				case LogoTurtleParser.MUL : return x * y;
-				case LogoTurtleParser.DIV : return x / y;
-				case LogoTurtleParser.MOD : return x % y;
-			}
+			retVal = performOperation( oper, x, y );
 		}
-		return 0;
+		else if ( isFloat(typeA) && isFloat(typeB) ) {
+			float x = ((Number)exec(a)).floatValue();
+			float y = ((Number)exec(b)).floatValue();
+
+		  retVal = performOperation( oper, x, y );
+		}
+		else if ( ( isFloat( typeA ) && isInt( typeB ) ) || 
+		          ( isInt( typeA ) && isFloat( typeB ) ) ) {
+			System.out.println( "Warning: Promoting integer to float." );
+			
+			float x = ((Number)exec(a)).floatValue();
+			float y = ((Number)exec(b)).floatValue();
+			
+			retVal =  performOperation( oper, x, y );
+		}
+		
+		return retVal;
 	}
 
+	public Integer performOperation( CommonTree node, Integer x, Integer y ) {
+		debug( "performing op on integers" );
+		
+		switch (node.getType()) {
+			case LogoTurtleParser.ADD : return x + y;
+			case LogoTurtleParser.SUB : return x - y;
+			case LogoTurtleParser.MUL : return x * y;
+			case LogoTurtleParser.DIV : return x / y;
+			case LogoTurtleParser.MOD : return x % y;
+			default: throw new UnsupportedOperationException("Node "+ node.getText()+"<"+node.getType()+"> not handled");
+		}
+	}
+	
+	public Float performOperation( CommonTree node, Float x, Float y ) {
+		debug( "performing op on floats" );
+		
+		switch (node.getType()) {
+			case LogoTurtleParser.ADD : return x + y;
+			case LogoTurtleParser.SUB : return x - y;
+			case LogoTurtleParser.MUL : return x * y;
+			case LogoTurtleParser.DIV : return x / y;
+			case LogoTurtleParser.MOD : return x % y;
+			default: throw new UnsupportedOperationException("Node "+ node.getText()+"<"+node.getType()+"> not handled");
+		}
+	}
+		
+	public boolean isInt( CommonTree node ) {
+		return node.getType() == LogoTurtleParser.TYPEINT;
+	}
+	
+	public boolean isFloat( CommonTree node ) {
+		return node.getType() == LogoTurtleParser.TYPEFLOAT;
+	}
+	
 	public Object paren(CommonTree t) {
 		debug("Entered PAREN");
 		return exec((CommonTree)t.getChild(0));

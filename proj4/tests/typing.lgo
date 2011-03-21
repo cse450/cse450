@@ -1,0 +1,11 @@
+make "x 6 * 9
+(print "should "be "_54)
+print :x
+make "z 3.0 + 2.3
+(print "should "be "_5point3)
+print :z
+make "a 3 + 1.2
+(print "should "be "_4point2 "and "promotion "warning "shown)
+print :a
+make "y 2 + "this_is_an_atom
+(print "exception "should "have "been "thrown)
