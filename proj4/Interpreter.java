@@ -10,6 +10,21 @@ import java.util.ArrayDeque;
 import java.util.*;
 import java.text.ParseException;
 
+////// turtle:
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+
+import javax.swing.*;
+import java.awt.geom.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.Graphics2D;
+
+import msu.cse.turtlegraphics.*;
+////// :turtle
+
 public class Interpreter {
     
     CommonTree root;               // the AST represents our code memory
@@ -20,8 +35,12 @@ public class Interpreter {
     ArrayDeque <MemorySpace> scopeStack = new ArrayDeque <MemorySpace> ();
 	Iterator <MemorySpace> scopeIter; 
 
-
 	public boolean isdebugging = false;
+
+////// turtle:
+	Turtle turtle = new Turtle();
+	TurtleDisplayFrame frame = new TurtleDisplayFrame();
+////// :turtle
 
 	public Interpreter()
 	{
@@ -44,7 +63,15 @@ public class Interpreter {
 			if ( parser.getNumberOfSyntaxErrors()==0 ) {
 					root = (CommonTree)r.getTree();
 					debug("tree: "+root.toStringTree());
+////// turtle:
+	frame.setVisible(true);
+	turtle.setCurrentTurtleDisplayCanvas(frame.getCurrentCanvas());
+////// :turtle
 					block(root);
+////// turtle:
+	//frame.dispose();
+	//frame = null;
+////// :turtle
 			}
 	}
 
@@ -77,7 +104,21 @@ public class Interpreter {
 						case LogoTurtleParser.REF :			return ref(t);
 						case LogoTurtleParser.VAL : 		return load(t);
 
-		
+						////// turtle:
+						case LogoTurtleParser.PD :	pd(t); break;
+						case LogoTurtleParser.PU :	pu(t); break;
+						case LogoTurtleParser.FD :	fd(t); break;
+						case LogoTurtleParser.BK :	bk(t); break;
+						case LogoTurtleParser.LT2 :	lt2(t); break;
+						case LogoTurtleParser.RT :	rt(t); break;
+						case LogoTurtleParser.SETH :	seth(t); break;
+						case LogoTurtleParser.SETP :	setp(t); break;
+						case LogoTurtleParser.CIRC :	circ(t); break;
+						case LogoTurtleParser.SPC :	spc(t); break;
+						case LogoTurtleParser.BEGF :	begf(t); break;
+						case LogoTurtleParser.ENDF :	endf(t); break;
+						////// :turtle
+
 						default : // catch unhandled node types
 								throw new UnsupportedOperationException("Node "+
 										t.getText()+"<"+t.getType()+"> not handled");
@@ -97,11 +138,13 @@ public class Interpreter {
 	public void fndef(CommonTree t) {
 		debug("Entered TO");
 		CommonTree lhs = (CommonTree)t.getChild(0).getChild(0);   // get operands
+		/*
 		scopeStack.peekLast().put(t.getChild(0).getText(),
 								    new Function(t.getChild(0).getText(),
 											   	t.getChild(1),
 											   	(CommonTree)t.getChild(2).getChildren()
 											   	));        
+		*/
 	}
 
 	public void fncall(CommonTree t) {
@@ -136,6 +179,7 @@ public class Interpreter {
 			// TODO: pop returnvar from stack
 
 			//		we might not be able to make this void?
+			
 		}
 	}
 
@@ -385,4 +429,80 @@ public class Interpreter {
 		debug("Entered REF");
 		return t.getChild(0).getText();
 	}
+	
+	///// turtle:
+	
+	public void pd(CommonTree t) {
+		debug("Entered PD");
+		turtle.turtlePenDown();
+	}
+
+	public void pu(CommonTree t) {
+		debug("Entered PU");		
+		turtle.turtlePenUp();
+	}
+
+	public void fd(CommonTree t) {
+		debug("Entered FD");
+		Object a = exec( (CommonTree)t.getChild(0) );
+		turtle.turtleForward(((Value)a).intValue());
+	}
+
+	public void bk(CommonTree t) {
+		debug("Entered BK");
+		Object a = exec( (CommonTree)t.getChild(0) );
+		turtle.turtleBackward(((Value)a).intValue());
+	}
+
+	public void lt2(CommonTree t) {
+		debug("Entered LT2");
+		Object a = exec( (CommonTree)t.getChild(0) );
+		turtle.turtleLeft(((Value)a).intValue());
+	}
+
+	public void rt(CommonTree t) {
+		debug("Entered RT");
+		Object a = exec( (CommonTree)t.getChild(0) );
+		turtle.turtleRight(((Value)a).intValue());
+	}
+
+	public void seth(CommonTree t) {
+		debug("Entered SETH");
+		Object a = exec( (CommonTree)t.getChild(0) );
+		turtle.turtleSetHeading(((Value)a).doubleValue());
+	}
+
+	public void setp(CommonTree t) {
+		debug("Entered SETP");
+		Object a = exec( (CommonTree)t.getChild(0) );
+		Object b = exec( (CommonTree)t.getChild(1) );
+		turtle.turtleGoto(new Point(((Value)a).intValue(), ((Value)b).intValue()));
+	}
+
+	public void circ(CommonTree t) {
+		debug("Entered CIRC");
+		Object a = exec( (CommonTree)t.getChild(0) );
+		Object b = exec( (CommonTree)t.getChild(1) );
+		turtle.turtleCircle(((Value)a).intValue(), ((Value)b).intValue());
+	}
+
+	public void spc(CommonTree t) {
+		debug("Entered SPC");
+		Object a = exec( (CommonTree)t.getChild(0) );
+		Object b = exec( (CommonTree)t.getChild(1) );
+		Object c = exec( (CommonTree)t.getChild(2) );
+		turtle.turtleSetColor(((Value)a).intValue(), 
+			((Value)b).intValue(), ((Value)c).intValue());
+	}
+
+	public void begf(CommonTree t) {
+		debug("Entered BEGF");
+		turtle.turtleBeginFillPolygon();
+	}
+
+	public void endf(CommonTree t) {
+		debug("Entered ENDF");
+		turtle.turtleEndFillPolygon();
+	}
+	////// :turtle
 }
