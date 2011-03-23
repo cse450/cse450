@@ -1,0 +1,2 @@
+make "x 3.2
+while [ :x < 9 ] [print :x make "x :x + "something_stupid]

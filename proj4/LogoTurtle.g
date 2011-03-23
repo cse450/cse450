@@ -38,7 +38,7 @@ prog: multistat;
 
 multistat : stat+ -> ^(BLOCK stat+); 
 
-stat:	'to' ID val* NL* multistat returnstat 'end' -> ^('to' ID val* multistat returnstat)
+stat:	'to' ID val* NL* multistat 'end' -> ^('to' ID val* multistat)
     |	'make' ref expr NL*  -> ^('make' ref expr)
     |	'print' printablestat NL* -> ^('print' printablestat)
     |	'(print' printablestat+ ')' NL* -> ^('print' printablestat+)
@@ -66,6 +66,7 @@ multExpr
     
 primary
     :   INT
+    |   FLOAT
     |   val
     |	ref
     |   '(' expr ')' -> ^(PAREN expr+)
@@ -84,4 +85,5 @@ NL: '\r'? '\n';
 COMMENT : ';' .* NL { skip(); };
 
 INT : '0'..'9'+ ;
+FLOAT : INT '.' INT;
 WS  :   (' '|'\t')+ {skip();} ;

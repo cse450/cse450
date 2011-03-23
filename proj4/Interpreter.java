@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.ArrayDeque;
 import java.util.*;
+import java.text.ParseException;
 
 public class Interpreter {
     
@@ -20,14 +21,12 @@ public class Interpreter {
 	Iterator <MemorySpace> scopeIter; 
 
 
-
 	public boolean isdebugging = false;
 
 	public Interpreter()
 	{
 		scopeStack.add( new MemorySpace("main") );
 	}
-
 	
 	private void debug (String st)
 	{ 
@@ -72,7 +71,8 @@ public class Interpreter {
 						case LogoTurtleParser.LTE :    		return lte(t);
 						case LogoTurtleParser.GTE :   		return gte(t);
 						case LogoTurtleParser.NOT : 	  	return not(t);
-						case LogoTurtleParser.INT : 		return Integer.parseInt(t.getText()); 
+						case LogoTurtleParser.INT : 		return new Value( Integer.parseInt(t.getText()), LogoTurtleParser.INT );
+						case LogoTurtleParser.FLOAT :    	return new Value( Float.parseFloat(t.getText()), LogoTurtleParser.FLOAT );
 						case LogoTurtleParser.PAREN : 		return paren(t);
 						case LogoTurtleParser.REF :			return ref(t);
 						case LogoTurtleParser.VAL : 		return load(t);
@@ -84,17 +84,59 @@ public class Interpreter {
 				}
 		}
 		catch (Exception e) {
-			System.out.print("Caught an error in the switch: ");
-			System.out.println(t);
+			System.out.print("Error: Interpretation failed at '");
+			System.out.print(t);
+			System.out.println("'");
+			System.out.print( "    Exception thrown: " );
 			System.out.println(e);
+			System.exit(1);
 		}
 			return null;
 	}
 
 	public void fndef(CommonTree t) {
 		debug("Entered TO");
+		CommonTree lhs = (CommonTree)t.getChild(0).getChild(0);   // get operands
+		scopeStack.peekLast().put(t.getChild(0).getText(),
+								    new Function(t.getChild(0).getText(),
+											   	t.getChild(1),
+											   	(CommonTree)t.getChild(2).getChildren()
+											   	));        
+	}
 
+	public void fncall(CommonTree t) {
+		debug("Entered CALL");
 
+		// Get Function from memory space
+		Function tmp = (Function)stload(t.getChild(0).getText());
+
+		if(tmp != null){
+			// Push new memoryspace to scope stack
+			scopeStack.add(new MemorySpace(
+								t.getChild(0).getText()
+							));
+
+			// Assign arguments
+			for (int i = 0; i < tmp.getParams().size(); i++){
+				//debug(tmp.getParam(i));
+                scopeStack.peekLast().put(tmp.getParam(i).getText(),t.getChild(1).getChild(i));
+			}
+
+			// Execute Function
+			/*
+			try {
+				exec(tmp.getTree());
+			}
+			*/
+			// Catch a FunctionFinishedException, or something like that
+			 
+			// Return statement will push value to stack,
+			// So we pop it
+
+			// TODO: pop returnvar from stack
+
+			//		we might not be able to make this void?
+		}
 	}
 
 	public void block(CommonTree t) {
@@ -124,21 +166,12 @@ public class Interpreter {
 			}
 			else
 			{
-				System.out.print( exec(x) + " ");
+				System.out.print( ((Value)exec(x)).getValueBasedOnType() + " ");
 			}
 		};
 		System.out.println("");
 	}
 
-	public void assign(CommonTree t) {
-		debug("Entered ASSIGN: ");
-		debug(t.getChild(0).getChild(0).getText());
-
-		CommonTree lhs = (CommonTree)t.getChild(0).getChild(0);   // get operands
-		CommonTree expr = (CommonTree)t.getChild(1);
-		Object value = exec(expr);            // walk/evaluate expr
-		scopeStack.peekLast().put(lhs.getText(), value);         // store
-	}
 
 	public void whileloop(CommonTree t) {
 		debug("Entered WHILE:");
@@ -180,8 +213,8 @@ public class Interpreter {
 	
 	public boolean eq(CommonTree t) {
 		debug("Entered EQ");
-		Object a = exec( (CommonTree)t.getChild(0) );
-		Object b = exec( (CommonTree)t.getChild(1) );
+		Value a = (Value)exec( (CommonTree)t.getChild(0) );
+		Value b = (Value)exec( (CommonTree)t.getChild(1) );
 		return a.equals(b);
 	}
 
@@ -189,9 +222,9 @@ public class Interpreter {
 		debug("Entered LT");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
-		if ( a instanceof Number && b instanceof Number ) {
-			Number x = (Number)a;
-			Number y = (Number)b;
+		if ( a instanceof Value && b instanceof Value ) {
+			Value x = (Value)a;
+			Value y = (Value)b;
 			return x.floatValue() < y.floatValue();
 		}
 		return false;
@@ -201,9 +234,9 @@ public class Interpreter {
 		debug("Entered GT");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
-		if ( a instanceof Number && b instanceof Number ) {
-			Number x = (Number)a;
-			Number y = (Number)b;
+		if ( a instanceof Value && b instanceof Value ) {
+			Value x = (Value)a;
+			Value y = (Value)b;
 			return x.floatValue() > y.floatValue();
 		}
 		return false;
@@ -213,9 +246,9 @@ public class Interpreter {
 		debug("Entered LTE");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
-		if ( a instanceof Number && b instanceof Number ) {
-			Number x = (Number)a;
-			Number y = (Number)b;
+		if ( a instanceof Value && b instanceof Value ) {
+			Value x = (Value)a;
+			Value y = (Value)b;
 			return x.floatValue() <= y.floatValue();
 		}
 		return false;
@@ -225,9 +258,9 @@ public class Interpreter {
 		debug("Entered GTE");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
-		if ( a instanceof Number && b instanceof Number ) {
-			Number x = (Number)a;
-			Number y = (Number)b;
+		if ( a instanceof Value && b instanceof Value ) {
+			Value x = (Value)a;
+			Value y = (Value)b;
 			return x.floatValue() >= y.floatValue();
 		}
 		return false;
@@ -238,56 +271,115 @@ public class Interpreter {
 		return !(Boolean)exec((CommonTree)t.getChild(0));
 	}
 	
-	public Object op(CommonTree t) {
+	public Value op(CommonTree oper) throws ParseException {
 		debug("Entered OP");
-		Object a = exec( (CommonTree)t.getChild(0) );
-		Object b = exec( (CommonTree)t.getChild(1) );
 		
-		if ( a instanceof Float || b instanceof Float ) {
-			float x = ((Number)a).floatValue();
-			float y = ((Number)b).floatValue();
-
-			switch (t.getType()) {
-				case LogoTurtleParser.ADD : return x + y;
-				case LogoTurtleParser.SUB : return x - y;
-				case LogoTurtleParser.MUL : return x * y;
-				case LogoTurtleParser.DIV : return x / y;
-				case LogoTurtleParser.MOD : return x % y;
-			}
+		Value a = null;
+		Value b = null;
+		
+		try {
+			a = (Value)exec( (CommonTree)(oper.getChild(0) ) );
+		  b = (Value)exec( (CommonTree)(oper.getChild(1) ) );
 		}
-		if ( a instanceof Integer || b instanceof Integer ) {
-	    //System.out.println("Operating on Ints");
-	    //System.out.println(t.getType());
-			int x = ((Number)a).intValue();
-			int y = ((Number)b).intValue();
+		catch ( ClassCastException ex ) {
+			throw new ParseException( "Cannot perform arithmetic operations on non-value types.", 0 );
+		}
+		
+		Value retVal = null;
+		
+		if ( isInt( a ) && isInt( b ) ) {
+	    
+			int x = a.intValue();
+			int y = b.intValue();
 			
-			switch (t.getType()) {
-				case LogoTurtleParser.ADD : return x + y;
-				case LogoTurtleParser.SUB : return x - y;
-				case LogoTurtleParser.MUL : return x * y;
-				case LogoTurtleParser.DIV : return x / y;
-				case LogoTurtleParser.MOD : return x % y;
-			}
+			retVal = new Value( performOperation( oper, x, y ), LogoTurtleParser.INT );
 		}
-		return 0;
+		else if ( isFloat( a ) && isFloat( b ) ) {
+			float x = a.floatValue();
+			float y = b.floatValue();
+
+		  retVal = new Value( performOperation( oper, x, y ), LogoTurtleParser.FLOAT );
+		}
+		else if ( ( isFloat( a ) && isInt( b ) ) || 
+		          ( isInt( a ) && isFloat( b ) ) ) {
+			System.out.println( "Warning: Promoting integer to float." );
+			
+			float x = a.floatValue();
+			float y = b.floatValue();
+			
+			retVal =  new Value( performOperation( oper, x, y ), LogoTurtleParser.FLOAT );
+		}
+		
+		return retVal;
 	}
 
+	public Integer performOperation( CommonTree node, Integer x, Integer y ) {
+		debug( "performing op on integers" );
+		
+		switch (node.getType()) {
+			case LogoTurtleParser.ADD : return x + y;
+			case LogoTurtleParser.SUB : return x - y;
+			case LogoTurtleParser.MUL : return x * y;
+			case LogoTurtleParser.DIV : return x / y;
+			case LogoTurtleParser.MOD : return x % y;
+			default: throw new UnsupportedOperationException("Node "+ node.getText()+"<"+node.getType()+"> not handled");
+		}
+	}
+	
+	public Float performOperation( CommonTree node, Float x, Float y ) {
+		debug( "performing op on floats" );
+		
+		switch (node.getType()) {
+			case LogoTurtleParser.ADD : return x + y;
+			case LogoTurtleParser.SUB : return x - y;
+			case LogoTurtleParser.MUL : return x * y;
+			case LogoTurtleParser.DIV : return x / y;
+			case LogoTurtleParser.MOD : return x % y;
+			default: throw new UnsupportedOperationException("Node "+ node.getText()+"<"+node.getType()+"> not handled");
+		}
+	}
+		
+	public boolean isInt( Value val ) {
+		return val.getType() == LogoTurtleParser.INT;
+	}
+	
+	public boolean isFloat( Value val ) {
+		return val.getType() == LogoTurtleParser.FLOAT;
+	}
+	
 	public Object paren(CommonTree t) {
 		debug("Entered PAREN");
 		return exec((CommonTree)t.getChild(0));
 	}
 		
-	public Object load(CommonTree t) {
+	private Object stload(String t) {
 		debug("Entered LOAD");
 		scopeIter = scopeStack.descendingIterator();
 		while( scopeIter.hasNext() )
 		{
 			MemorySpace tmp = scopeIter.next();
-			if (tmp.has(t.getChild(0).getText()))
-				return tmp.get(t.getChild(0).getText());
+			if (tmp.has(t))
+				return tmp.get(t);
 		}
 		return null;
 	}
+
+	public Object load(CommonTree t) {
+		return stload( t.getChild(0).getText() );
+	}
+
+	public void assign(CommonTree t) {
+		debug("Entered ASSIGN: ");
+
+		CommonTree lhs = (CommonTree)t.getChild(0).getChild(0);   // get operands
+		CommonTree expr = (CommonTree)t.getChild(1);
+		Object value = exec(expr);
+
+		debug( t.getChild(0).getChild(0).getText() + " = " + ((Value)value).getValueBasedOnType() );
+		
+		scopeStack.peekLast().put(lhs.getText(), value);         // store
+	}
+
 
 	public Object ref(CommonTree t) {
 		debug("Entered REF");
