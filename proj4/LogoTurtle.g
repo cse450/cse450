@@ -22,6 +22,7 @@ GTE = '>=';
 NOT = 'not';
 
 TO = 'to';
+OUTPUT = 'output';
 IF = 'if';
 IFELSE = 'ifelse';
 WHILE = 'while';
@@ -53,6 +54,7 @@ prog: multistat;
 multistat : stat+ -> ^(BLOCK stat+); 
 
 stat:	'to' ID val* NL* multistat 'end' -> ^('to' ID val* multistat)
+    |   returnstat
     |	'make' ref expr NL*  -> ^('make' ref expr)
     |	'print' printablestat NL* -> ^('print' printablestat)
     |	'(print' printablestat+ ')' NL* -> ^('print' printablestat+)
@@ -77,7 +79,7 @@ stat:	'to' ID val* NL* multistat 'end' -> ^('to' ID val* multistat)
 printablestat: expr;//|ref;
 
 returnstat
-	:	'output' expr NL*;
+	:	'output' expr NL* -> ^( 'output' expr );
 
 negateablecondition : 'not'^? condition;
 
