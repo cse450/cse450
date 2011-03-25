@@ -69,7 +69,12 @@ public class Interpreter {
 	frame.setVisible(true);
 	turtle.setCurrentTurtleDisplayCanvas(frame.getCurrentCanvas());
 ////// :turtle
+				try {
 					block(root);
+				}
+				catch ( FunctionReturnException ex ) {
+					//do nothing here.
+				}
 ////// turtle:
 	frame.dispose();
 	frame = null;
@@ -78,7 +83,7 @@ public class Interpreter {
 	}
 
 	/** visitor dispatch according to node token type */
-	public Object exec(CommonTree t){
+	public Object exec(CommonTree t) throws FunctionReturnException { 
 		try {
 				switch ( t.getType() ) {
 						case LogoTurtleParser.BLOCK : 		block(t); 		break;
@@ -131,20 +136,30 @@ public class Interpreter {
 										t.getText()+"<"+t.getType()+"> not handled");
 				}
 		}
-		catch (Exception e) {
-			System.out.print("Error: Interpretation failed at '");
-			System.out.print(t);
-			System.out.println("'");
-			System.out.print( "    Exception thrown: " );
-			System.out.println(e);
-			System.exit(1);
+    catch (ClassCastException e) {
+       DisplayError(t,e);
+    }
+    catch (ParseException e) {
+       DisplayError(t,e);
+    }
+    catch (UnsupportedOperationException e) {
+			DisplayError(t,e);
 		}
 			return null;
 	}
 
+  public void DisplayError( CommonTree t, Exception e ){
+    System.out.print("Error: Interpretation failed at '");
+    System.out.print(t);
+		System.out.println("'");
+		System.out.print( "    Exception thrown: " );
+		System.out.println(e);
+		System.exit(1);
+  }
+
 	public void output(CommonTree t) throws FunctionReturnException {
 		debug("OUTPUT");
-		throw new FunctionReturnException (t);
+		throw new FunctionReturnException(t);
 	}
 
 	public ArrayList<String> valist(CommonTree t) {
@@ -163,7 +178,7 @@ public class Interpreter {
 	}
 
 
-	public void fndef(CommonTree t) {
+	public void fndef(CommonTree t) throws FunctionReturnException {
 		debug("Entered TO");
 
 		@SuppressWarnings("unchecked")
@@ -184,7 +199,7 @@ public class Interpreter {
 		
 	}
 
-	public Object fncall(CommonTree t) {
+	public Object fncall(CommonTree t) throws FunctionReturnException {
 		debug("Entered CALL");
 
 		// Get Function from memory space
@@ -213,15 +228,14 @@ public class Interpreter {
 			try {
 				debug("Entered EXEC");
 				exec(tmp.mBlock);
-				throw new FunctionReturnException();
 			}
 			catch (FunctionReturnException e) {
 				debug("Entered RETURN");
-				return exec((CommonTree)e.getRetval());
+				return ((Value)exec((CommonTree)e.getRetval()));
 			}
 			finally 
 			{
-				return null;
+				scopeStack.pop();
 			}
 
 
@@ -240,7 +254,7 @@ public class Interpreter {
 		return null;
 	}
 
-	public void block(CommonTree t) {
+	public void block(CommonTree t) throws FunctionReturnException {
 		debug("Entered BLOCK");
 		if ( t.getType()!=LogoTurtleParser.BLOCK ) {
 			debug("Problem with BLOCK");
@@ -253,13 +267,15 @@ public class Interpreter {
 		}
 	}
 
-	public void print(CommonTree t) {
+	public void print(CommonTree t) throws FunctionReturnException {
 		debug("PRINT: ");
 		//CommonTree expr = (CommonTree)t.getChild(0);
 		//System.out.println( exec(expr) );
 		// Extended for expression lists! //
 		@SuppressWarnings("unchecked")
 		List<CommonTree> exprs = t.getChildren();
+		
+		debug( exprs.toString() );
 		for (CommonTree x : exprs) {
 			if ( x.getType() == LogoTurtleParser.REF )
 			{
@@ -267,14 +283,15 @@ public class Interpreter {
 			}
 			else
 			{
-				System.out.print( ((Value)exec(x)).getValueBasedOnType() + " ");
+				Number val = ((Value)exec(x)).getValueBasedOnType();
+				System.out.print( val + " ");
 			}
 		};
 		System.out.println("");
 	}
 
 
-	public void whileloop(CommonTree t) {
+	public void whileloop(CommonTree t) throws FunctionReturnException {
 		debug("Entered WHILE:");
 		CommonTree condStart = (CommonTree)t.getChild(0);
 		CommonTree codeStart = (CommonTree)t.getChild(1);
@@ -285,7 +302,7 @@ public class Interpreter {
 		}
 	}
 
-	public void ifstat(CommonTree t) {
+	public void ifstat(CommonTree t) throws FunctionReturnException {
 		debug("Entered IF");
 		CommonTree condStart = (CommonTree)t.getChild(0);
 		CommonTree codeStart = (CommonTree)t.getChild(1);
@@ -293,7 +310,7 @@ public class Interpreter {
 		if ( ((Boolean)c).booleanValue() ) exec(codeStart);
 	}
 
-	public void ifelsestat(CommonTree t) {
+	public void ifelsestat(CommonTree t) throws FunctionReturnException {
 		debug("Entered IFELSE");
 		CommonTree condStart = (CommonTree)t.getChild(0);
 		CommonTree codeStart = (CommonTree)t.getChild(1);
@@ -312,14 +329,14 @@ public class Interpreter {
 		}
 	}
 	
-	public boolean eq(CommonTree t) {
+	public boolean eq(CommonTree t) throws FunctionReturnException {
 		debug("Entered EQ");
 		Value a = (Value)exec( (CommonTree)t.getChild(0) );
 		Value b = (Value)exec( (CommonTree)t.getChild(1) );
 		return a.equals(b);
 	}
 
-	public boolean lt(CommonTree t) {
+	public boolean lt(CommonTree t) throws FunctionReturnException {
 		debug("Entered LT");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
@@ -331,7 +348,7 @@ public class Interpreter {
 		return false;
 	}
 
-	public boolean gt(CommonTree t) {
+	public boolean gt(CommonTree t) throws FunctionReturnException {
 		debug("Entered GT");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
@@ -343,7 +360,7 @@ public class Interpreter {
 		return false;
 	}
 
-	public boolean lte(CommonTree t) {
+	public boolean lte(CommonTree t) throws FunctionReturnException {
 		debug("Entered LTE");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
@@ -355,7 +372,7 @@ public class Interpreter {
 		return false;
 	}
 
-	public boolean gte(CommonTree t) {
+	public boolean gte(CommonTree t) throws FunctionReturnException {
 		debug("Entered GTE");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
@@ -367,12 +384,12 @@ public class Interpreter {
 		return false;
 	}
 	
-	public boolean not(CommonTree t) {
+	public boolean not(CommonTree t) throws FunctionReturnException {
 		debug( "Entered NOT" );
 		return !(Boolean)exec((CommonTree)t.getChild(0));
 	}
 	
-	public Value op(CommonTree oper) throws ParseException {
+	public Value op(CommonTree oper) throws ParseException, FunctionReturnException {
 		debug("Entered OP");
 		
 		Value a = null;
@@ -448,7 +465,7 @@ public class Interpreter {
 		return val.getType() == LogoTurtleParser.FLOAT;
 	}
 	
-	public Object paren(CommonTree t) {
+	public Object paren(CommonTree t) throws FunctionReturnException {
 		debug("Entered PAREN");
 		return exec((CommonTree)t.getChild(0));
 	}
@@ -469,7 +486,7 @@ public class Interpreter {
 		return stload( t.getChild(0).getText() );
 	}
 
-	public void assign(CommonTree t) {
+	public void assign(CommonTree t) throws FunctionReturnException {
 		debug("Entered ASSIGN: ");
 
 		CommonTree lhs = (CommonTree)t.getChild(0).getChild(0);   // get operands
@@ -499,51 +516,51 @@ public class Interpreter {
 		turtle.turtlePenUp();
 	}
 
-	public void fd(CommonTree t) {
+	public void fd(CommonTree t) throws FunctionReturnException {
 		debug("Entered FD");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		turtle.turtleForward(((Value)a).intValue());
 	}
 
-	public void bk(CommonTree t) {
+	public void bk(CommonTree t) throws FunctionReturnException {
 		debug("Entered BK");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		turtle.turtleBackward(((Value)a).intValue());
 	}
 
-	public void lt2(CommonTree t) {
+	public void lt2(CommonTree t) throws FunctionReturnException {
 		debug("Entered LT2");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		turtle.turtleLeft(((Value)a).intValue());
 	}
 
-	public void rt(CommonTree t) {
+	public void rt(CommonTree t) throws FunctionReturnException {
 		debug("Entered RT");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		turtle.turtleRight(((Value)a).intValue());
 	}
 
-	public void seth(CommonTree t) {
+	public void seth(CommonTree t) throws FunctionReturnException {
 		debug("Entered SETH");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		turtle.turtleSetHeading(((Value)a).doubleValue());
 	}
 
-	public void setp(CommonTree t) {
+	public void setp(CommonTree t) throws FunctionReturnException {
 		debug("Entered SETP");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
 		turtle.turtleGoto(new Point(((Value)a).intValue(), ((Value)b).intValue()));
 	}
 
-	public void circ(CommonTree t) {
+	public void circ(CommonTree t) throws FunctionReturnException {
 		debug("Entered CIRC");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
 		turtle.turtleCircle(((Value)a).intValue(), ((Value)b).intValue());
 	}
 
-	public void spc(CommonTree t) {
+	public void spc(CommonTree t) throws FunctionReturnException {
 		debug("Entered SPC");
 		Object a = exec( (CommonTree)t.getChild(0) );
 		Object b = exec( (CommonTree)t.getChild(1) );
