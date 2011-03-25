@@ -3,7 +3,7 @@ import org.antlr.runtime.tree.*;
 
 import java.io.*;
 
-class FunctionReturnException extends Exception
+class FunctionReturnException extends RuntimeException
 {
   CommonTree retval;
 

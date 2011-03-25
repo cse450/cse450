@@ -128,6 +128,10 @@ public class Interpreter {
 										t.getText()+"<"+t.getType()+"> not handled");
 				}
 		}
+
+		catch (FunctionReturnException e) {
+			throw e;
+		}
 		catch (Exception e) {
 			System.out.print("Error: Interpretation failed at '");
 			System.out.print(t);
