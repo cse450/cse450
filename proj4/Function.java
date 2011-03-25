@@ -1,29 +1,37 @@
 import org.antlr.runtime.*;
 import org.antlr.runtime.tree.*;
-import java.util.List;
+import java.util.ArrayList;
 
 
 public class Function {
 
-	private String mName;
-	private CommonTree mBlock;
-	private List<CommonTree> mParams;
+	String mName;
+	CommonTree mBlock;
+	ArrayList<String> mParams;
 
-	public Function(String _name, CommonTree _block, List<CommonTree> _params) {
+	public Function() {
+		this.mName = new String();
+		this.mBlock = null;
+		this.mParams = new ArrayList<String>();
+	}
+
+	public Function(String _name, CommonTree _block, ArrayList<String> _params) {
 		this.mName = _name;
 		this.mBlock = _block;
 		this.mParams = _params;
 	}
 
-	public List<CommonTree> getParams()
+	public ArrayList<String> getParams()
 	{
 		return mParams;
 	}
 
-	public CommonTree getParam(int i)
+	public String getParam(int i)
 	{
 		return mParams.get(i);
 	}
 
 
 }
+
+		

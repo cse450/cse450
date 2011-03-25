@@ -35,6 +35,8 @@ public class Interpreter {
     ArrayDeque <MemorySpace> scopeStack = new ArrayDeque <MemorySpace> ();
 	Iterator <MemorySpace> scopeIter; 
 
+	ArrayDeque <Value> retStack = new ArrayDeque <Value> ();
+
 	public boolean isdebugging = false;
 
 ////// turtle:
@@ -69,14 +71,14 @@ public class Interpreter {
 ////// :turtle
 					block(root);
 ////// turtle:
-	//frame.dispose();
-	//frame = null;
+	frame.dispose();
+	frame = null;
 ////// :turtle
 			}
 	}
 
 	/** visitor dispatch according to node token type */
-	public Object exec(CommonTree t) {
+	public Object exec(CommonTree t){
 		try {
 				switch ( t.getType() ) {
 						case LogoTurtleParser.BLOCK : 		block(t); 		break;
@@ -103,6 +105,11 @@ public class Interpreter {
 						case LogoTurtleParser.PAREN : 		return paren(t);
 						case LogoTurtleParser.REF :			return ref(t);
 						case LogoTurtleParser.VAL : 		return load(t);
+
+						case LogoTurtleParser.VALIST:		return valist(t);
+
+						case LogoTurtleParser.FNCALL:		return fncall(t);
+						case LogoTurtleParser.OUTPUT:		output(t); break;
 
 						////// turtle:
 						case LogoTurtleParser.PD :	pd(t); break;
@@ -135,19 +142,49 @@ public class Interpreter {
 			return null;
 	}
 
-	public void fndef(CommonTree t) {
-		debug("Entered TO");
-		CommonTree lhs = (CommonTree)t.getChild(0).getChild(0);   // get operands
-		/*
-		scopeStack.peekLast().put(t.getChild(0).getText(),
-								    new Function(t.getChild(0).getText(),
-											   	t.getChild(1),
-											   	(CommonTree)t.getChild(2).getChildren()
-											   	));        
-		*/
+	public void output(CommonTree t) throws FunctionReturnException {
+		debug("OUTPUT");
+		throw new FunctionReturnException (t);
 	}
 
-	public void fncall(CommonTree t) {
+	public ArrayList<String> valist(CommonTree t) {
+
+		debug("Entered VALIST");
+
+		@SuppressWarnings("unchecked")
+		ArrayList<String> a = new ArrayList<String>();
+
+		@SuppressWarnings("unchecked")
+		List<CommonTree> stats = t.getChildren();
+		for (CommonTree x : stats) {
+			a.add(x.getText());
+		}
+		return a;
+	}
+
+
+	public void fndef(CommonTree t) {
+		debug("Entered TO");
+
+		@SuppressWarnings("unchecked")
+		CommonTree lhs = (CommonTree)t.getChild(0).getChild(0);   // get operands
+
+		@SuppressWarnings("unchecked")
+        List<CommonTree> stats = t.getChildren();
+
+		@SuppressWarnings("unchecked")
+		ArrayList<String> params = (ArrayList)exec((CommonTree)t.getChild(1));
+		String name = t.getChild(0).getText();
+
+		scopeStack.peekLast().put(name,new Function(name,
+											   		(CommonTree)t.getChild(2),
+											   		params)
+								);        
+		
+		
+	}
+
+	public Object fncall(CommonTree t) {
 		debug("Entered CALL");
 
 		// Get Function from memory space
@@ -160,17 +197,36 @@ public class Interpreter {
 							));
 
 			// Assign arguments
-			for (int i = 0; i < tmp.getParams().size(); i++){
-				//debug(tmp.getParam(i));
-                scopeStack.peekLast().put(tmp.getParam(i).getText(),t.getChild(1).getChild(i));
+			
+			int i = 1;
+			for (String p : tmp.getParams()){
+				debug(p);
+				debug(t.getChild(i).getText());
+                scopeStack.peekLast().put(p,exec((CommonTree)t.getChild(i)));
+				i = i+1;
 			}
 
-			// Execute Function
-			/*
+		    // Execute Function
+
+			Object a = new Object();
+			
 			try {
-				exec(tmp.getTree());
+				debug("Entered EXEC");
+				exec(tmp.mBlock);
+				throw new FunctionReturnException();
 			}
-			*/
+			catch (FunctionReturnException e) {
+				debug("Entered RETURN");
+				return exec((CommonTree)e.getRetval());
+			}
+			finally 
+			{
+				return null;
+			}
+
+
+			//return null;
+			
 			// Catch a FunctionFinishedException, or something like that
 			 
 			// Return statement will push value to stack,
@@ -181,6 +237,7 @@ public class Interpreter {
 			//		we might not be able to make this void?
 			
 		}
+		return null;
 	}
 
 	public void block(CommonTree t) {

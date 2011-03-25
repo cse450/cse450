@@ -27,6 +27,7 @@ IFELSE = 'ifelse';
 WHILE = 'while';
 PRINT = 'print';
 ASSIGN = 'make';
+FNCALL = 'fncall';
 
 REF = '"';
 VAL = ':';
@@ -44,6 +45,9 @@ SPC = 'spc';
 BEGF = 'begf';
 ENDF = 'endf';
 
+OUTPUT = 'output';
+
+VALIST;
 }
 // END: header
 
@@ -52,13 +56,14 @@ prog: multistat;
 
 multistat : stat+ -> ^(BLOCK stat+); 
 
-stat:	'to' ID val* NL* multistat 'end' -> ^('to' ID val* multistat)
-    |	'make' ref expr NL*  -> ^('make' ref expr)
-    |	'print' printablestat NL* -> ^('print' printablestat)
-    |	'(print' printablestat+ ')' NL* -> ^('print' printablestat+)
-    |   'if' NL* negateablecondition NL* '[' NL* multistat NL* ']' NL* -> ^( 'if' negateablecondition multistat )
-    |	'ifelse' NL* negateablecondition NL* '[' NL* ifcode=multistat NL* ']' NL* '[' NL* elsecode=multistat NL* ']' NL* -> ^( 'ifelse' negateablecondition $ifcode $elsecode )
-    |   'while' NL* '[' NL* negateablecondition NL* ']' NL* '[' NL* multistat NL* ']' NL* -> ^( 'while' negateablecondition multistat )
+stat:	'to' ID valist NL* multistat NL* 'end' NL* -> ^('to' ID valist multistat)
+	|	'output' expr NL* -> ^('output' expr)	
+	|	'make' ref expr NL*  -> ^('make' ref expr)
+    	|	'print' printablestat NL* -> ^('print' printablestat)
+    	|	'(print' printablestat+ ')' NL* -> ^('print' printablestat+)
+    	|   	'if' NL* negateablecondition NL* '[' NL* multistat NL* ']' NL* -> ^( 'if' negateablecondition multistat )
+    	|	'ifelse' NL* negateablecondition NL* '[' NL* ifcode=multistat NL* ']' NL* '[' NL* elsecode=multistat NL* ']' NL* -> ^( 'ifelse' negateablecondition $ifcode $elsecode )
+    	|   	'while' NL* '[' NL* negateablecondition NL* ']' NL* '[' NL* multistat NL* ']' NL* -> ^( 'while' negateablecondition multistat )
 	|	('pd'|'pendown') NL* -> ^(PD)
 	|	('pu'|'penup') NL* -> ^(PU)
 	|	('fd'|'forward') expr NL* -> ^(FD expr)
@@ -84,12 +89,16 @@ negateablecondition : 'not'^? condition;
 condition: expr ( '<'^|'>'^|'<='^|'>='^|'='^ ) expr;
 
 expr: multExpr (('+'^|'-'^) multExpr)*
-    | 'modulo' expr expr -> ^('modulo' expr expr);
+    | 'modulo' expr expr -> ^('modulo' expr expr)
+    |  fncall;
+ 
+fncall	:	ID '(' expr+ ')' ->^('fncall' ID expr+);
 
 multExpr
     :   primary (('*'^|'/'^) primary)*
     ;
     
+
 primary
     :   INT
     |   FLOAT
@@ -100,6 +109,8 @@ primary
     
 ref : ('"' ID) -> ^(REF ID);
 val : (':' ID) -> ^(VAL ID);
+
+valist 	: '('(':' ID)*')' -> ^(VALIST ID*);
 
 
 ID : ( '_' | CHAR )( '_' | CHAR | INT )* ;
