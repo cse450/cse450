@@ -22,6 +22,7 @@ GTE = '>=';
 NOT = 'not';
 
 TO = 'to';
+OUTPUT = 'output';
 IF = 'if';
 IFELSE = 'ifelse';
 WHILE = 'while';
@@ -82,7 +83,7 @@ stat:	'to' ID valist NL* multistat NL* 'end' NL* -> ^('to' ID valist multistat)
 printablestat: expr;//|ref;
 
 returnstat
-	:	'output' expr NL*;
+	:	'output' expr NL* -> ^( 'output' expr );
 
 negateablecondition : 'not'^? condition;
 
