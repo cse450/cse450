@@ -68,12 +68,9 @@ public class Interpreter {
 ////// turtle:
 	frame.setVisible(true);
 	turtle.setCurrentTurtleDisplayCanvas(frame.getCurrentCanvas());
+	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 ////// :turtle
 					block(root);
-////// turtle:
-	frame.dispose();
-	frame = null;
-////// :turtle
 			}
 	}
 
