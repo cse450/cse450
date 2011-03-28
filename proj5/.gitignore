@@ -2,3 +2,4 @@ output
 *.class
 *~
 .project
+.classpath

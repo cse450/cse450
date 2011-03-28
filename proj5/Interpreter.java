@@ -1,36 +1,29 @@
 
-import org.antlr.runtime.*;
-import org.antlr.runtime.tree.*;
-
-import java.io.InputStream;
+import java.awt.Point;
 import java.io.IOException;
-import java.util.List;
-import java.util.Stack;
-import java.util.ArrayDeque;
-import java.util.*;
+import java.io.InputStream;
 import java.text.ParseException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-////// turtle:
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import javax.swing.JFrame;
 
-import javax.swing.*;
-import java.awt.geom.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.Graphics2D;
+import msu.cse.turtlegraphics.Turtle;
+import msu.cse.turtlegraphics.TurtleDisplayFrame;
 
-import msu.cse.turtlegraphics.*;
-////// :turtle
+import org.antlr.runtime.ANTLRInputStream;
+import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.TokenRewriteStream;
+import org.antlr.runtime.tree.CommonTree;
 
 public class Interpreter {
     
     CommonTree root;               // the AST represents our code memory
     TokenRewriteStream tokens;
-    LogoTurtleLexer lex;              // lexer/parser are part of the processor
-    LogoTurtleParser parser;
+    LogoJVM1Lexer lex;              // lexer/parser are part of the processor
+    LogoJVM1Parser parser;
 
     ArrayDeque <MemorySpace> scopeStack = new ArrayDeque <MemorySpace> ();
 	Iterator <MemorySpace> scopeIter; 
@@ -57,11 +50,11 @@ public class Interpreter {
 	}
 
 	public void interp(InputStream input) throws RecognitionException, IOException {
-			lex = new LogoTurtleLexer(new ANTLRInputStream(input));
+			lex = new LogoJVM1Lexer(new ANTLRInputStream(input));
 			tokens = new TokenRewriteStream(lex);
-			parser = new LogoTurtleParser(tokens);
+			parser = new LogoJVM1Parser(tokens);
 
-			LogoTurtleParser.prog_return r = parser.prog();
+			LogoJVM1Parser.prog_return r = parser.prog();
 			if ( parser.getNumberOfSyntaxErrors()==0 ) {
 					root = (CommonTree)r.getTree();
 					debug("tree: "+root.toStringTree());
@@ -87,49 +80,49 @@ public class Interpreter {
 	public Object exec(CommonTree t) throws FunctionReturnException { 
 		try {
 				switch ( t.getType() ) {
-						case LogoTurtleParser.BLOCK : 		block(t); 		break;
-						case LogoTurtleParser.ASSIGN : 		assign(t); 		break;
-						case LogoTurtleParser.PRINT : 		print(t); 		break;
-						case LogoTurtleParser.IF : 			ifstat(t); 		break;
-						case LogoTurtleParser.IFELSE : 		ifelsestat(t); 	break;
-						case LogoTurtleParser.WHILE : 		whileloop(t); 	break;
-						case LogoTurtleParser.TO :			fndef(t); 		break;
+						case LogoJVM1Parser.BLOCK : 		block(t); 		break;
+						case LogoJVM1Parser.ASSIGN : 		assign(t); 		break;
+						case LogoJVM1Parser.PRINT : 		print(t); 		break;
+						case LogoJVM1Parser.IF : 			ifstat(t); 		break;
+						case LogoJVM1Parser.IFELSE : 		ifelsestat(t); 	break;
+						case LogoJVM1Parser.WHILE : 		whileloop(t); 	break;
+						case LogoJVM1Parser.TO :			fndef(t); 		break;
 
-						case LogoTurtleParser.ADD : 		return op(t);
-						case LogoTurtleParser.SUB : 		return op(t);
-						case LogoTurtleParser.MUL : 		return op(t);
-						case LogoTurtleParser.DIV : 		return op(t);
-						case LogoTurtleParser.MOD :     	return op(t);
-						case LogoTurtleParser.EQ : 			return eq(t); 
-						case LogoTurtleParser.LT : 			return lt(t);
-						case LogoTurtleParser.GT :    		return gt(t);
-						case LogoTurtleParser.LTE :    		return lte(t);
-						case LogoTurtleParser.GTE :   		return gte(t);
-						case LogoTurtleParser.NOT : 	  	return not(t);
-						case LogoTurtleParser.INT : 		return new Value( Integer.parseInt(t.getText()), LogoTurtleParser.INT );
-						case LogoTurtleParser.FLOAT :    	return new Value( Float.parseFloat(t.getText()), LogoTurtleParser.FLOAT );
-						case LogoTurtleParser.PAREN : 		return paren(t);
-						case LogoTurtleParser.REF :			return ref(t);
-						case LogoTurtleParser.VAL : 		return load(t);
+						case LogoJVM1Parser.ADD : 		return op(t);
+						case LogoJVM1Parser.SUB : 		return op(t);
+						case LogoJVM1Parser.MUL : 		return op(t);
+						case LogoJVM1Parser.DIV : 		return op(t);
+						case LogoJVM1Parser.MOD :     	return op(t);
+						case LogoJVM1Parser.EQ : 			return eq(t); 
+						case LogoJVM1Parser.LT : 			return lt(t);
+						case LogoJVM1Parser.GT :    		return gt(t);
+						case LogoJVM1Parser.LTE :    		return lte(t);
+						case LogoJVM1Parser.GTE :   		return gte(t);
+						case LogoJVM1Parser.NOT : 	  	return not(t);
+						case LogoJVM1Parser.INT : 		return new Value( Integer.parseInt(t.getText()), LogoJVM1Parser.INT );
+						case LogoJVM1Parser.FLOAT :    	return new Value( Float.parseFloat(t.getText()), LogoJVM1Parser.FLOAT );
+						case LogoJVM1Parser.PAREN : 		return paren(t);
+						case LogoJVM1Parser.REF :			return ref(t);
+						case LogoJVM1Parser.VAL : 		return load(t);
 
-						case LogoTurtleParser.VALIST:		return valist(t);
+						case LogoJVM1Parser.VALIST:		return valist(t);
 
-						case LogoTurtleParser.FNCALL:		return fncall(t);
-						case LogoTurtleParser.OUTPUT:		output(t); break;
+						case LogoJVM1Parser.FNCALL:		return fncall(t);
+						case LogoJVM1Parser.OUTPUT:		output(t); break;
 
 						////// turtle:
-						case LogoTurtleParser.PD :	pd(t); break;
-						case LogoTurtleParser.PU :	pu(t); break;
-						case LogoTurtleParser.FD :	fd(t); break;
-						case LogoTurtleParser.BK :	bk(t); break;
-						case LogoTurtleParser.LT2 :	lt2(t); break;
-						case LogoTurtleParser.RT :	rt(t); break;
-						case LogoTurtleParser.SETH :	seth(t); break;
-						case LogoTurtleParser.SETP :	setp(t); break;
-						case LogoTurtleParser.CIRC :	circ(t); break;
-						case LogoTurtleParser.SPC :	spc(t); break;
-						case LogoTurtleParser.BEGF :	begf(t); break;
-						case LogoTurtleParser.ENDF :	endf(t); break;
+						case LogoJVM1Parser.PD :	pd(t); break;
+						case LogoJVM1Parser.PU :	pu(t); break;
+						case LogoJVM1Parser.FD :	fd(t); break;
+						case LogoJVM1Parser.BK :	bk(t); break;
+						case LogoJVM1Parser.LT2 :	lt2(t); break;
+						case LogoJVM1Parser.RT :	rt(t); break;
+						case LogoJVM1Parser.SETH :	seth(t); break;
+						case LogoJVM1Parser.SETP :	setp(t); break;
+						case LogoJVM1Parser.CIRC :	circ(t); break;
+						case LogoJVM1Parser.SPC :	spc(t); break;
+						case LogoJVM1Parser.BEGF :	begf(t); break;
+						case LogoJVM1Parser.ENDF :	endf(t); break;
 						////// :turtle
 
 						default : // catch unhandled node types
@@ -164,10 +157,8 @@ public class Interpreter {
 	}
 
 	public ArrayList<String> valist(CommonTree t) {
-
 		debug("Entered VALIST");
 
-		@SuppressWarnings("unchecked")
 		ArrayList<String> a = new ArrayList<String>();
 
 		@SuppressWarnings("unchecked")
@@ -183,21 +174,13 @@ public class Interpreter {
 		debug("Entered TO");
 
 		@SuppressWarnings("unchecked")
-		CommonTree lhs = (CommonTree)t.getChild(0).getChild(0);   // get operands
-
-		@SuppressWarnings("unchecked")
-        List<CommonTree> stats = t.getChildren();
-
-		@SuppressWarnings("unchecked")
 		ArrayList<String> params = (ArrayList)exec((CommonTree)t.getChild(1));
 		String name = t.getChild(0).getText();
 
 		scopeStack.peekLast().put(name,new Function(name,
 											   		(CommonTree)t.getChild(2),
 											   		params)
-								);        
-		
-		
+								);		
 	}
 
 	public Object fncall(CommonTree t) throws FunctionReturnException {
@@ -221,10 +204,6 @@ public class Interpreter {
                 scopeStack.peekLast().put(p,exec((CommonTree)t.getChild(i)));
 				i = i+1;
 			}
-
-		    // Execute Function
-
-			Object a = new Object();
 			
 			try {
 				debug("Entered EXEC");
@@ -257,7 +236,7 @@ public class Interpreter {
 
 	public void block(CommonTree t) throws FunctionReturnException {
 		debug("Entered BLOCK");
-		if ( t.getType()!=LogoTurtleParser.BLOCK ) {
+		if ( t.getType()!=LogoJVM1Parser.BLOCK ) {
 			debug("Problem with BLOCK");
 		}
 		@SuppressWarnings("unchecked")
@@ -278,7 +257,7 @@ public class Interpreter {
 		
 		debug( exprs.toString() );
 		for (CommonTree x : exprs) {
-			if ( x.getType() == LogoTurtleParser.REF )
+			if ( x.getType() == LogoJVM1Parser.REF )
 			{
 				System.out.print( x.getChild(0).getText() + " " );
 			}
@@ -411,13 +390,13 @@ public class Interpreter {
 			int x = a.intValue();
 			int y = b.intValue();
 			
-			retVal = new Value( performOperation( oper, x, y ), LogoTurtleParser.INT );
+			retVal = new Value( performOperation( oper, x, y ), LogoJVM1Parser.INT );
 		}
 		else if ( isFloat( a ) && isFloat( b ) ) {
 			float x = a.floatValue();
 			float y = b.floatValue();
 
-		  retVal = new Value( performOperation( oper, x, y ), LogoTurtleParser.FLOAT );
+		  retVal = new Value( performOperation( oper, x, y ), LogoJVM1Parser.FLOAT );
 		}
 		else if ( ( isFloat( a ) && isInt( b ) ) || 
 		          ( isInt( a ) && isFloat( b ) ) ) {
@@ -426,7 +405,7 @@ public class Interpreter {
 			float x = a.floatValue();
 			float y = b.floatValue();
 			
-			retVal =  new Value( performOperation( oper, x, y ), LogoTurtleParser.FLOAT );
+			retVal =  new Value( performOperation( oper, x, y ), LogoJVM1Parser.FLOAT );
 		}
 		
 		return retVal;
@@ -436,11 +415,11 @@ public class Interpreter {
 		debug( "performing op on integers" );
 		
 		switch (node.getType()) {
-			case LogoTurtleParser.ADD : return x + y;
-			case LogoTurtleParser.SUB : return x - y;
-			case LogoTurtleParser.MUL : return x * y;
-			case LogoTurtleParser.DIV : return x / y;
-			case LogoTurtleParser.MOD : return x % y;
+			case LogoJVM1Parser.ADD : return x + y;
+			case LogoJVM1Parser.SUB : return x - y;
+			case LogoJVM1Parser.MUL : return x * y;
+			case LogoJVM1Parser.DIV : return x / y;
+			case LogoJVM1Parser.MOD : return x % y;
 			default: throw new UnsupportedOperationException("Node "+ node.getText()+"<"+node.getType()+"> not handled");
 		}
 	}
@@ -449,21 +428,21 @@ public class Interpreter {
 		debug( "performing op on floats" );
 		
 		switch (node.getType()) {
-			case LogoTurtleParser.ADD : return x + y;
-			case LogoTurtleParser.SUB : return x - y;
-			case LogoTurtleParser.MUL : return x * y;
-			case LogoTurtleParser.DIV : return x / y;
-			case LogoTurtleParser.MOD : return x % y;
+			case LogoJVM1Parser.ADD : return x + y;
+			case LogoJVM1Parser.SUB : return x - y;
+			case LogoJVM1Parser.MUL : return x * y;
+			case LogoJVM1Parser.DIV : return x / y;
+			case LogoJVM1Parser.MOD : return x % y;
 			default: throw new UnsupportedOperationException("Node "+ node.getText()+"<"+node.getType()+"> not handled");
 		}
 	}
 		
 	public boolean isInt( Value val ) {
-		return val.getType() == LogoTurtleParser.INT;
+		return val.getType() == LogoJVM1Parser.INT;
 	}
 	
 	public boolean isFloat( Value val ) {
-		return val.getType() == LogoTurtleParser.FLOAT;
+		return val.getType() == LogoJVM1Parser.FLOAT;
 	}
 	
 	public Object paren(CommonTree t) throws FunctionReturnException {

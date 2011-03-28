@@ -1,8 +1,7 @@
-import org.antlr.runtime.*;
-import org.antlr.runtime.tree.*;
+import org.antlr.runtime.tree.CommonTree;
 
-import java.io.*;
-
+// We don't care about serializing this exception
+@SuppressWarnings("serial")
 class FunctionReturnException extends Exception
 {
   CommonTree retval;

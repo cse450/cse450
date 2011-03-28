@@ -1,8 +1,5 @@
-import java.lang.Number;
-
-import org.antlr.runtime.*;
-import org.antlr.runtime.tree.*;
-
+// We wont want to serialize this
+@SuppressWarnings("serial")
 public class Value extends Number {
 	private Number mValue;
 	private int mType;
@@ -39,9 +36,9 @@ public class Value extends Number {
 	
 	public Number getValueBasedOnType() {
 		switch ( mType ) {
-			case LogoTurtleParser.INT:
+			case LogoJVM1Parser.INT:
 				return this.intValue();
-			case LogoTurtleParser.FLOAT:
+			case LogoJVM1Parser.FLOAT:
 				return this.floatValue();
 			default:
 				return null;

@@ -1,10 +1,7 @@
 import java.io.InputStream;
-import java.io.FileInputStream;
-import java.util.*;
 
 public class InterpLogoTurtle {
-	@SuppressWarnings("unchecked")
-    public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 			InputStream input = null;
 			input = System.in;
 			
