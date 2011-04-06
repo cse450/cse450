@@ -1,0 +1,5 @@
+to something :a :b
+output :a + :b
+end
+
+print something ( 3 4 )

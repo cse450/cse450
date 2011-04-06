@@ -1,0 +1,10 @@
+to multiply (:x :y)
+print :x
+print :y
+
+output :x * :y
+
+end
+
+print multiply (2 3)
+

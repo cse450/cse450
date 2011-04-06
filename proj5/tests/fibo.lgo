@@ -1,0 +1,14 @@
+; fibonacci calculator. Does the 10th fibo number
+make "n 0
+make "first 0
+make "second 1
+
+while [:n < 10][
+   make "temp :first + :second
+   make "first :second
+   make "second :temp
+   make "n :n + 1
+]
+print :first  ; 10th fibonacci, should be 55
+
+
