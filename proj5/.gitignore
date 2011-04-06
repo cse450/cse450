@@ -3,3 +3,5 @@ output
 *~
 .project
 .classpath
+.settings
+*antlr-*
