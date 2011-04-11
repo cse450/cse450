@@ -1,0 +1,9 @@
+#!/bin/sh
+
+CP=/Users/ad/clas/cse450/cse450/*:./output:.:..:/Users/ad/src/antlr-3.3/lib/*
+
+java  -cp $CP org.antlr.Tool -o output *.g
+javac -cp $CP *.java
+#javac -Xlint:unchecked -cp $CP *.java
+java  -cp $CP Proj5
+
