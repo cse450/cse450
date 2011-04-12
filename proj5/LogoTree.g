@@ -6,19 +6,17 @@ options {
 	output=template;
 }
 
-@header {
-	import java.util.HashMap;
-}
+prog: (s+=stat)+ -> Output(instructions={$s});
 
-@members {
-	HashMap locals;
-}
+stat: ^('make' ref expr) -> assign(a={$ref.st}, b={$expr.st});
 
-prog[int numOps, HashMap locals] @init { this.locals = locals; }
-  : (s+=stat)+ -> initJasmin( instructions={$s},
-			      maxStackDepth={numOps+2},
-			      maxLocals={locals.size()+1}
-  ;
+ref: ^(REF ID) -> var(a={$ID.text});
 
-stat:;
+expr:	^('+' a=expr b=expr) -> add(a={$a.st}, b={$b.st})
+	|	^('-' a=expr b=expr) -> sub(a={$a.st}, b={$b.st})
+	|	^('*' a=expr b=expr) -> mul(a={$a.st}, b={$b.st})
+	|	^('/' a=expr b=expr) -> div(a={$a.st}, b={$b.st})
+	|	INT -> int(a={$INT.text})
+	|	VAR
+	;
 
