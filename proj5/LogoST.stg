@@ -8,8 +8,9 @@ THIS IS THE START OF THE OUTPUT
 THIS IS THE END OF THE OUTPUT
 >>
 
-assign(a, b) ::= <<
-<a> = <b>
+assign(expression, varNum) ::= <<
+<expression; separator="\n">
+istore <varNum>
 >>
 
 var(a) ::= <<
@@ -17,21 +18,29 @@ var <a>
 >>
 
 add(a, b) ::= <<
-<a> + <b>
+<a>
+<b>
+iadd
 >>
 
 sub(a, b) ::= <<
-<a> - <b>
+<a>
+<b>
+isub
 >>
 
 mul(a, b) ::= <<
-<a> * <b>
+<a>
+<b>
+imul
 >>
 
 div(a, b) ::= <<
-<a> / <b>
+<a>
+<b>
+idiv
 >>
 
-int(a) ::= <<
-int <a>
+int(i) ::= <<
+ldc <i>
 >>

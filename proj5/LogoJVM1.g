@@ -3,14 +3,28 @@ grammar LogoJVM1;
 options{output=AST; ASTLabelType=CommonTree;}
 tokens{BLOCK; PAREN; REF; VAR;}
 
-prog: stat+;
-stat: 'make' ref expr -> ^('make' ref expr);
+@header {
+	import java.util.HashMap;
+}
 
-expr: mexpr (('+'|'-')^ mexpr)*;
-mexpr: atom (('*'|'/')^ atom)*;
+@members {
+	int numOps = 0;
+	HashMap locals = new HashMap();
+	int localVarNum = 1;
+}
+
+prog: stat+;
+stat: 'make' ref expr {
+	if( locals.get($ref.id) == null ){
+		locals.put( $ref.id, new Integer(localVarNum++) );
+	}
+} -> ^('make' ref expr);
+
+expr: mexpr (('+'|'-')^ mexpr { numOps++; } )*;
+mexpr: atom (('*'|'/')^ atom { numOps++; } )*;
 atom: INT|var|'(' expr ')' -> ^(PAREN expr+);
 
-ref: '"' ID -> ^(REF ID);
+ref returns [String id]: '"' ID {$id = $ID.text;} -> ^(REF ID);
 var: ':' ID -> ^(VAR ID);
 
 ID: CHAR (CHAR|DIGIT)*;

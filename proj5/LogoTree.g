@@ -6,17 +6,27 @@ options {
 	output=template;
 }
 
-prog: (s+=stat)+ -> Output(instructions={$s});
+@header{
+	import java.util.HashMap;
+}
 
-stat: ^('make' ref expr) -> assign(a={$ref.st}, b={$expr.st});
+@members{
+	HashMap locals;
+}
 
-ref: ^(REF ID) -> var(a={$ID.text});
+prog [int numOps, HashMap locals]
+	@init{ this.locals = locals; } 
+	:(s+=stat)+ -> Output(instructions={$s});
+
+stat: ^('make' ref expr) -> assign(expression={$expr.st}, varNum={locals.get($ref.id)});
+
+ref returns [String id] : ^(REF ID) { $id = $ID.text; };
 
 expr:	^('+' a=expr b=expr) -> add(a={$a.st}, b={$b.st})
 	|	^('-' a=expr b=expr) -> sub(a={$a.st}, b={$b.st})
 	|	^('*' a=expr b=expr) -> mul(a={$a.st}, b={$b.st})
 	|	^('/' a=expr b=expr) -> div(a={$a.st}, b={$b.st})
-	|	INT -> int(a={$INT.text})
+	|	INT -> int(i={$INT.text})
 	|	VAR
 	;
 
