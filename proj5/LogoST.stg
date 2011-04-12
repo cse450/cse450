@@ -62,6 +62,6 @@ ldc <i>
 >>
 
 
-paren(expr)::=<<
-<expr:{e|<e>}; separator="\n" >
+paren(exprs)::=<<
+<exprs:{e|<e>}; separator="\n" >
 >>

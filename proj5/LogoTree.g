@@ -29,7 +29,7 @@ expr:	^('+' a=expr b=expr) -> add(a={$a.st}, b={$b.st})
 	|	^('/' a=expr b=expr) -> div(a={$a.st}, b={$b.st})
 	|	INT -> int(i={$INT.text})
 	|	var -> var(varNum = {locals.get($var.id)})
-	|       paren -> paren(expr={$paren.enclosedExprs})
+	|       paren -> paren(exprs={$paren.enclosedExprs})
 	;
 
 paren returns [List<CommonTree> enclosedExprs]: ^(PAREN (exprs+=expr)+) { $enclosedExprs = $exprs; };
