@@ -17,11 +17,14 @@ public class Proj5 {
         stgFile.close();
 
         CommonTree t = (CommonTree)r.getTree();
+
+        System.out.println( "; " + t.toStringTree() );
+
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
         nodes.setTokenStream(tokens);
         LogoTree walker = new LogoTree(nodes);
 		walker.setTemplateLib(stg);
-		LogoTree.prog_return w = walker.prog(); //LogoTree.g
+		LogoTree.prog_return w = walker.prog( parser.numOps, parser.locals ); //LogoTree.g
 
 		StringTemplate st = (StringTemplate)w.getTemplate(); 
         System.out.println(st.toString());

@@ -1,11 +1,27 @@
 group LogoST;
 
-Output(instructions)::=<<
-THIS IS THE START OF THE OUTPUT
+Output(instructions,maxStackDepth,maxLocals)::=<<
+; public class LogoJVM1 extends Object { ...}
+.class public LogoJVM1
+.super java/lang/Object
 
-<instructions; separator="\n">
+; public LogoJVM1() { super(); } // calls java.lang.Object()
+.method public ()V
+   aload_0
+   invokenonvirtual java/lang/Object/()V
+   return
+.end method
 
-THIS IS THE END OF THE OUTPUT
+; main(): Expr.g will generate bytecode in this method
+.method public static main([Ljava/lang/String;)V
+   .limit stack <maxStackDepth> ; how much stack space do we need?
+   .limit locals <maxLocals> ; how many locals do we need?
+   getstatic java/lang/System/out Ljava/io/PrintStream;
+   ; code translated from input stream
+   <instructions; separator="\n">
+   ; print result on top of stack
+   return
+.end method
 >>
 
 assign(expression, varNum) ::= <<

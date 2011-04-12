@@ -16,7 +16,7 @@ options {
 
 prog [int numOps, HashMap locals]
 	@init{ this.locals = locals; } 
-	:(s+=stat)+ -> Output(instructions={$s});
+	:(s+=stat)+ -> Output(instructions={$s},maxStackDepth={numOps+1+2-1},maxLocals={locals.size()+1-2+2});
 
 stat: ^('make' ref expr) -> assign(expression={$expr.st}, varNum={locals.get($ref.id)});
 
