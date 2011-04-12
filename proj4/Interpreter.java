@@ -137,15 +137,15 @@ public class Interpreter {
 										t.getText()+"<"+t.getType()+"> not handled");
 				}
 		}
-    catch (ClassCastException e) {
-       DisplayError(t,e);
-    }
-    catch (ParseException e) {
-       DisplayError(t,e);
-    }
-    catch (UnsupportedOperationException e) {
-			DisplayError(t,e);
-		}
+			catch (ClassCastException e) {
+			   DisplayError(t,e);
+			}
+			catch (ParseException e) {
+			   DisplayError(t,e);
+			}
+			catch (UnsupportedOperationException e) {
+					DisplayError(t,e);
+			}
 			return null;
 	}
 
@@ -200,7 +200,7 @@ public class Interpreter {
 		
 	}
 
-	public Object fncall(CommonTree t) throws FunctionReturnException {
+	public Value fncall(CommonTree t){
 		debug("Entered CALL");
 
 		// Get Function from memory space
@@ -224,7 +224,7 @@ public class Interpreter {
 
 		    // Execute Function
 
-			Object a = new Object();
+			Value a = null;
 			
 			try {
 				debug("Entered EXEC");
@@ -232,25 +232,14 @@ public class Interpreter {
 			}
 			catch (FunctionReturnException e) {
 				debug("Entered RETURN");
-				return ((Value)exec((CommonTree)e.getRetval()));
+				a = (Value)exec((CommonTree)e.getRetval());
 			}
 			finally 
 			{
 				scopeStack.pop();
+				return a;
 			}
 
-
-			//return null;
-			
-			// Catch a FunctionFinishedException, or something like that
-			 
-			// Return statement will push value to stack,
-			// So we pop it
-
-			// TODO: pop returnvar from stack
-
-			//		we might not be able to make this void?
-			
 		}
 		return null;
 	}
