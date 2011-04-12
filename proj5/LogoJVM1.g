@@ -5,6 +5,7 @@ tokens{BLOCK; PAREN; REF; VAR;}
 
 @header {
 	import java.util.HashMap;
+	import java.io.*;
 }
 
 @members {
@@ -33,4 +34,9 @@ INT: DIGIT+;
 fragment CHAR: 'a'..'z'|'A'..'Z'|'_';
 fragment DIGIT: '0'..'9';
 
-WS: (' '|'\t'|'\r'|'\n')+ {skip();};
+WS: (' '|'\t')+ {skip();};
+
+NL: '\r'?'\n' {skip();};
+
+COMMENT: ';' .* NL { skip(); };
+

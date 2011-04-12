@@ -22,9 +22,11 @@ public class Proj5 {
 
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
         nodes.setTokenStream(tokens);
+		
         LogoTree walker = new LogoTree(nodes);
 		walker.setTemplateLib(stg);
 		LogoTree.prog_return w = walker.prog( parser.numOps, parser.locals ); //LogoTree.g
+		
 
 		StringTemplate st = (StringTemplate)w.getTemplate(); 
         System.out.println(st.toString());

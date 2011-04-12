@@ -8,6 +8,7 @@ options {
 
 @header{
 	import java.util.HashMap;
+	import java.io.*;
 }
 
 @members{
