@@ -25,7 +25,7 @@ mexpr: atom (('*'|'/')^ atom { numOps++; } )*;
 atom: INT|var|'(' expr ')' -> ^(PAREN expr+);
 
 ref returns [String id]: '"' ID {$id = $ID.text;} -> ^(REF ID);
-var: ':' ID -> ^(VAR ID);
+var returns [String id]: ':' ID {$id = $ID.text;} -> ^(VAR ID);
 
 ID: CHAR (CHAR|DIGIT)*;
 INT: DIGIT+;

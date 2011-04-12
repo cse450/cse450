@@ -21,12 +21,13 @@ prog [int numOps, HashMap locals]
 stat: ^('make' ref expr) -> assign(expression={$expr.st}, varNum={locals.get($ref.id)});
 
 ref returns [String id] : ^(REF ID) { $id = $ID.text; };
+var returns [String id] : ^(VAR ID) { $id = $ID.text; };
 
 expr:	^('+' a=expr b=expr) -> add(a={$a.st}, b={$b.st})
 	|	^('-' a=expr b=expr) -> sub(a={$a.st}, b={$b.st})
 	|	^('*' a=expr b=expr) -> mul(a={$a.st}, b={$b.st})
 	|	^('/' a=expr b=expr) -> div(a={$a.st}, b={$b.st})
 	|	INT -> int(i={$INT.text})
-	|	VAR
+	|	var -> var(varNum = {locals.get($var.id)})
 	;
 

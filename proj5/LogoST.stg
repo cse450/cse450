@@ -29,8 +29,8 @@ assign(expression, varNum) ::= <<
 istore <varNum>
 >>
 
-var(a) ::= <<
-var <a>
+var(varNum) ::= <<
+iload <varNum>
 >>
 
 add(a, b) ::= <<
