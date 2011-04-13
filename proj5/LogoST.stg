@@ -99,6 +99,56 @@ aload_1
 invokevirtual msu/cse/turtlegraphics/Turtle/turtleForward(I)V
 >>
 
+back(dist)::=<<
+aload_1
+<dist; separator="\n">
+invokevirtual msu/cse/turtlegraphics/Turtle/turtleBackward(I)V
+>>
+
+left(dist)::=<<
+aload_1
+<dist; separator="\n">
+invokevirtual msu/cse/turtlegraphics/Turtle/turtleLeft(I)V
+>>
+
+right(dist)::=<<
+aload_1
+<dist; separator="\n">
+invokevirtual msu/cse/turtlegraphics/Turtle/turtleRight(I)V
+>>
+
+seth(dist)::=<<
+aload_1
+<dist; separator="\n">
+i2d ;set heading only accepts doubles as input
+invokevirtual msu/cse/turtlegraphics/Turtle/turtleSetHeading(D)V
+>>
+
+setp(x,y)::=<<
+aload_1
+new java/awt/Point
+dup
+<x; separator="\n">
+<y; separator="\n">
+invokespecial java/awt/Point/\<init\>(II)V
+invokevirtual msu/cse/turtlegraphics/Turtle/turtleGoto(Ljava/awt/Point;)V
+>>
+
+circ(r,angle)::=<<
+aload_1
+<r; separator="\n">
+<angle; separator="\n">
+invokevirtual msu/cse/turtlegraphics/Turtle/turtleCircle(II)V
+>>
+
+spc(r,g,b)::=<<
+aload_1
+<r; separator="\n">
+<g; separator="\n">
+<b; separator="\n">
+invokevirtual msu/cse/turtlegraphics/Turtle/turtleSetColor(III)V
+>>
+
 begf()::=<<
 aload_1
 invokevirtual msu/cse/turtlegraphics/Turtle/turtleBeginFillPolygon()V

@@ -23,6 +23,13 @@ stat: ^('make' ref expr) -> assign(expression={$expr.st}, varNum={locals.get($re
     | PD -> pendown()
     | PU -> penup()
     | ^(FD expr) -> fwd(dist={$expr.st})
+    | ^(BK expr) -> back(dist={$expr.st})
+    | ^(LT2 expr) -> left(dist={$expr.st})
+    | ^(RT expr) -> right(dist={$expr.st})
+    | ^(SETH expr) -> seth(dist={$expr.st})
+    | ^(SETP x=expr y=expr) -> setp(x={$x.st}, y={$y.st})
+    | ^(CIRC r=expr angle=expr) -> circ(r={$r.st}, angle={$angle.st})
+    | ^(SPC r=expr g=expr b=expr) -> spc(r={$r.st}, g={$g.st}, b={$b.st})
     | BEGF -> begf()
     | ENDF -> endf()
     ;

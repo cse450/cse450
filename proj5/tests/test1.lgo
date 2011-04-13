@@ -1,6 +1,11 @@
 make "x 6 + (7 - 12 + 14) * 18 ; my comment
 make "y :x + 2
 pd
-beginfill
-fd 12 + 15 - :y
-endf
+fd :y
+seth 45
+fd :y
+setpos [10 10]
+seth 135
+fd :y
+setpencolor[0 128 0]
+circle 20 45 + 180
