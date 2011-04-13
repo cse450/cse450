@@ -1,25 +1,43 @@
 group LogoST;
 
 Output(instructions,maxStackDepth,maxLocals)::=<<
-; public class LogoJVM1 extends Object { ...}
 .class public LogoJVM1
 .super java/lang/Object
 
-; public LogoJVM1() { super(); } // calls java.lang.Object()
 .method public ()V
    aload_0
    invokenonvirtual java/lang/Object/()V
    return
 .end method
 
-; main(): Expr.g will generate bytecode in this method
 .method public static main([Ljava/lang/String;)V
    .limit stack <maxStackDepth> ; how much stack space do we need?
    .limit locals <maxLocals> ; how many locals do we need?
-   getstatic java/lang/System/out Ljava/io/PrintStream;
-   ; code translated from input stream
+   getstatic java/lang/System/out Ljava/io/PrintStream;   
+
+   ; INIT turtle members
+   ;  - Turtle Instance a_1
+   ;  - Frame Instance a_2 
+   new msu/cse/turtlegraphics/Turtle
+   dup
+   invokespecial msu/cse/turtlegraphics/Turtle/\<init\>()V
+   astore_1
+   new msu/cse/turtlegraphics/TurtleDisplayFrame
+   dup
+   invokespecial msu/cse/turtlegraphics/TurtleDisplayFrame/\<init\>()V
+   astore_2
+   aload_2
+   iconst_1
+   invokevirtual msu/cse/turtlegraphics/TurtleDisplayFrame/setVisible(Z)V
+   aload_1
+   aload_2
+   invokevirtual msu/cse/turtlegraphics/TurtleDisplayFrame/getCurrentCanvas()Lmsu/cse/turtlegraphics/TurtleDisplayCanvas;
+   invokevirtual msu/cse/turtlegraphics/Turtle/setCurrentTurtleDisplayCanvas(Lmsu/cse/turtlegraphics/TurtleDisplayCanvas;)V
+   
+   ; END turtle members
+   
    <instructions; separator="\n">
-   ; print result on top of stack
+
    return
 .end method
 >>
@@ -61,7 +79,32 @@ int(i) ::= <<
 ldc <i>
 >>
 
-
 paren(exprs)::=<<
 <exprs:{e|<e>}; separator="\n" >
+>>
+
+penup()::=<<
+aload_1
+invokevirtual msu/cse/turtlegraphics/Turtle/turtlePenUp()V
+>>
+
+pendown()::=<<
+aload_1
+invokevirtual msu/cse/turtlegraphics/Turtle/turtlePenDown()V
+>>
+
+fwd(dist)::=<<
+aload_1
+<dist; separator="\n">
+invokevirtual msu/cse/turtlegraphics/Turtle/turtleForward(I)V
+>>
+
+begf()::=<<
+aload_1
+invokevirtual msu/cse/turtlegraphics/Turtle/turtleBeginFillPolygon()V
+>>
+
+endf()::=<<
+aload_1
+invokevirtual msu/cse/turtlegraphics/Turtle/turtleEndFillPolygon()V
 >>

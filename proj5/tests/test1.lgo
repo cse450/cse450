@@ -1,2 +1,6 @@
 make "x 6 + (7 - 12 + 14) * 18 ; my comment
 make "y :x + 2
+pd
+beginfill
+fd 12 + 15 - :y
+endf

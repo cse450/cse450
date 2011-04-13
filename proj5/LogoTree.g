@@ -17,9 +17,15 @@ options {
 
 prog [int numOps, HashMap locals]
 	@init{ this.locals = locals; } 
-	:(s+=stat)+ -> Output(instructions={$s},maxStackDepth={numOps+1+2-1},maxLocals={locals.size()+1-2+2});
+	:(s+=stat)+ -> Output(instructions={$s},maxStackDepth={numOps+2},maxLocals={locals.size()+3});
 
-stat: ^('make' ref expr) -> assign(expression={$expr.st}, varNum={locals.get($ref.id)});
+stat: ^('make' ref expr) -> assign(expression={$expr.st}, varNum={locals.get($ref.id)})
+    | PD -> pendown()
+    | PU -> penup()
+    | ^(FD expr) -> fwd(dist={$expr.st})
+    | BEGF -> begf()
+    | ENDF -> endf()
+    ;
 
 ref returns [String id] : ^(REF ID) { $id = $ID.text; };
 var returns [String id] : ^(VAR ID) { $id = $ID.text; };

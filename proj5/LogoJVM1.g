@@ -1,7 +1,11 @@
 grammar LogoJVM1;
 
 options{output=AST; ASTLabelType=CommonTree;}
-tokens{BLOCK; PAREN; REF; VAR;}
+tokens{BLOCK; PAREN; REF; VAR;
+       PD = 'pd'; PU = 'pu'; FD = 'fd'; 
+       BK = 'bk'; LT2 = 'lt2'; RT = 'rt';
+       SETH = 'seth'; SETP = 'setp'; CIRC = 'circ'; 
+       SPC = 'spc'; BEGF = 'begf'; ENDF = 'endf'; }
 
 @header {
 	import java.util.HashMap;
@@ -11,15 +15,27 @@ tokens{BLOCK; PAREN; REF; VAR;}
 @members {
 	int numOps = 0;
 	HashMap locals = new HashMap();
-	int localVarNum = 1;
+	int localVarNum = 3;
 }
 
 prog: stat+;
-stat: 'make' ref expr {
-	if( locals.get($ref.id) == null ){
-		locals.put( $ref.id, new Integer(localVarNum++) );
-	}
-} -> ^('make' ref expr);
+stat : 'make' ref expr { if( locals.get($ref.id) == null ){
+			     locals.put( $ref.id, new Integer(localVarNum++) );
+			 }
+	               } -> ^('make' ref expr)
+     |	('pd'|'pendown') -> ^(PD)
+     |	('pu'|'penup') -> ^(PU)
+     |	('fd'|'forward') expr -> ^(FD expr)
+     |	('bk'|'back') expr -> ^(BK expr)
+     |	('lt'|'left') expr -> ^(LT2 expr)
+     |	('rt'|'right') expr -> ^(RT expr)
+     |	('seth'|'setheading') expr -> ^(SETH expr)
+     |	'setpos' '[' expr expr ']' -> ^(SETP expr expr)
+     |	'circle' expr expr -> ^(CIRC expr expr)
+     |	'setpencolor' '[' expr expr expr ']' -> ^(SPC expr expr expr)
+     |	'beginfill' -> ^(BEGF)
+     |	'endfill' -> ^(ENDF)
+     ;
 
 expr: mexpr (('+'|'-')^ mexpr { numOps++; } )*;
 mexpr: atom (('*'|'/')^ atom { numOps++; } )*;
