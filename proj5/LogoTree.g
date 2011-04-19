@@ -20,6 +20,7 @@ prog [int numOps, HashMap locals]
 	:(s+=stat)+ -> Output(instructions={$s},maxStackDepth={numOps+2},maxLocals={locals.size()+3});
 
 stat: ^('make' ref expr) -> assign(expression={$expr.st}, varNum={locals.get($ref.id)})
+	|	^('print' expr) -> print(expression={$expr.st})
     | PD -> pendown()
     | PU -> penup()
     | ^(FD expr) -> fwd(dist={$expr.st})

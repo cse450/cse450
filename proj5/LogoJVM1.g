@@ -23,6 +23,7 @@ stat : 'make' ref expr { if( locals.get($ref.id) == null ){
 			     locals.put( $ref.id, new Integer(localVarNum++) );
 			 }
 	               } -> ^('make' ref expr)
+	| 'print' expr -> ^('print' expr)
      |	('pd'|'pendown') -> ^(PD)
      |	('pu'|'penup') -> ^(PU)
      |	('fd'|'forward') expr -> ^(FD expr)
@@ -51,9 +52,13 @@ DBL: DIGIT+ '.' DIGIT+;
 fragment CHAR: 'a'..'z'|'A'..'Z'|'_';
 fragment DIGIT: '0'..'9';
 
+/*
 WS: (' '|'\t')+ {skip();};
 
 NL: '\r'?'\n' {skip();};
 
 COMMENT: ';' .* NL { skip(); };
+*/
+
+WS: (' '|'\t'|'\r'|'\n')+ {skip();};
 
