@@ -12,8 +12,7 @@ Output(instructions,maxStackDepth,maxLocals)::=<<
 
 .method public static main([Ljava/lang/String;)V
    .limit stack <maxStackDepth> ; how much stack space do we need?
-   .limit locals <maxLocals> ; how many locals do we need?
-   getstatic java/lang/System/out Ljava/io/PrintStream;   
+   .limit locals <maxLocals> ; how many locals do we need?   
 
    ; INIT turtle members
    ;  - Turtle Instance a_1
@@ -47,8 +46,17 @@ assign(expression, varNum) ::= <<
 istore <varNum>
 >>
 
+dassign(expression, varNum)::=<<
+<expression; separator="\n">
+dstore <varNum>
+>>
+
 var(varNum) ::= <<
 iload <varNum>
+>>
+
+dvar(varNum)::=<<
+dload <varNum>
 >>
 
 add(a, b) ::= <<
@@ -77,6 +85,10 @@ idiv
 
 int(i) ::= <<
 ldc <i>
+>>
+
+dbl(d)::=<<
+ldc2_w	<d>d
 >>
 
 paren(exprs)::=<<
