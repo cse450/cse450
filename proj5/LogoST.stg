@@ -35,7 +35,7 @@ Output(instructions,maxStackDepth,maxLocals)::=<<
    
    ;To end program when window is closed
    aload_2
-   ldc 3 ;Constant value for JFrame.EXIT_ON_CLOSE... :)
+   getstatic javax/swing/JFrame/EXIT_ON_CLOSE I
    invokevirtual msu/cse/turtlegraphics/TurtleDisplayFrame/setDefaultCloseOperation(I)V
    
    ; END turtle members
