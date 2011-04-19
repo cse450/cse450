@@ -39,7 +39,7 @@ stat : 'make' ref expr { if( locals.get($ref.id) == null ){
 
 expr: mexpr (('+'|'-')^ mexpr { numOps++; } )*;
 mexpr: atom (('*'|'/')^ atom { numOps++; } )*;
-atom: INT|DBL|var|'(' expr ')' -> ^(PAREN expr+);
+atom: INT|DBL|var|'(' expr ')' -> ^(PAREN expr);
 
 ref returns [String id]: '"' ID {$id = $ID.text;} -> ^(REF ID);
 var returns [String id]: ':' ID {$id = $ID.text;} -> ^(VAR ID);

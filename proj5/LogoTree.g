@@ -44,7 +44,6 @@ expr:	^('+' a=expr b=expr) -> add(a={$a.st}, b={$b.st})
     |	INT -> int(i={$INT.text})
     |	DBL -> dbl(d={$DBL.text})
     |	var -> var(varNum = {locals.get($var.id)})
-    |   paren -> paren(exprs={$paren.enclosedExprs})
+	|	^(PAREN a=expr) -> paren(a={$a.st})
     ;
 
-paren returns [List<CommonTree> enclosedExprs]: ^(PAREN (exprs+=expr)+) { $enclosedExprs = $exprs; };

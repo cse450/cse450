@@ -46,6 +46,16 @@ Output(instructions,maxStackDepth,maxLocals)::=<<
 .end method
 >>
 
+print(expression) ::= <<
+getstatic java/lang/System/out Ljava/io/PrintStream;
+<expression; separator="\n">
+invokevirtual java/io/PrintStream/println(I)V
+>>
+
+paren(a) ::= <<
+<a>
+>>
+
 assign(expression, varNum) ::= <<
 <expression; separator="\n">
 istore <varNum>
