@@ -33,6 +33,11 @@ Output(instructions,maxStackDepth,maxLocals)::=<<
    invokevirtual msu/cse/turtlegraphics/TurtleDisplayFrame/getCurrentCanvas()Lmsu/cse/turtlegraphics/TurtleDisplayCanvas;
    invokevirtual msu/cse/turtlegraphics/Turtle/setCurrentTurtleDisplayCanvas(Lmsu/cse/turtlegraphics/TurtleDisplayCanvas;)V
    
+   ;To end program when window is closed
+   aload_2
+   ldc 3 ;Constant value for JFrame.EXIT_ON_CLOSE... :)
+   invokevirtual msu/cse/turtlegraphics/TurtleDisplayFrame/setDefaultCloseOperation(I)V
+   
    ; END turtle members
    
    <instructions; separator="\n">
