@@ -106,10 +106,6 @@ dbl(d)::=<<
 ldc2_w	<d>d
 >>
 
-paren(exprs)::=<<
-<exprs:{e|<e>}; separator="\n" >
->>
-
 penup()::=<<
 aload_1
 invokevirtual msu/cse/turtlegraphics/Turtle/turtlePenUp()V
