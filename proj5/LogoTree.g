@@ -38,12 +38,13 @@ ref returns [String id] : ^(REF ID) { $id = $ID.text; };
 var returns [String id] : ^(VAR ID) { $id = $ID.text; };
 
 expr:	^('+' a=expr b=expr) -> add(a={$a.st}, b={$b.st})
-	|	^('-' a=expr b=expr) -> sub(a={$a.st}, b={$b.st})
-	|	^('*' a=expr b=expr) -> mul(a={$a.st}, b={$b.st})
-	|	^('/' a=expr b=expr) -> div(a={$a.st}, b={$b.st})
-	|	INT -> int(i={$INT.text})
-	|	var -> var(varNum = {locals.get($var.id)})
-	|       paren -> paren(exprs={$paren.enclosedExprs})
-	;
+    |	^('-' a=expr b=expr) -> sub(a={$a.st}, b={$b.st})
+    |	^('*' a=expr b=expr) -> mul(a={$a.st}, b={$b.st})
+    |	^('/' a=expr b=expr) -> div(a={$a.st}, b={$b.st})
+    |	INT -> int(i={$INT.text})
+    |	DBL -> dbl(d={$DBL.text})
+    |	var -> var(varNum = {locals.get($var.id)})
+    |   paren -> paren(exprs={$paren.enclosedExprs})
+    ;
 
 paren returns [List<CommonTree> enclosedExprs]: ^(PAREN (exprs+=expr)+) { $enclosedExprs = $exprs; };

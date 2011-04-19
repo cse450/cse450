@@ -4,7 +4,7 @@ pd
 fd :y
 seth 45
 fd :y
-setpos [10 10]
+setpos [10 10] ;something else happening here
 seth 135
 fd :y
 setpencolor[0 128 0]
